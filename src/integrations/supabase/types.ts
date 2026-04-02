@@ -47,6 +47,39 @@ export type Database = {
         }
         Relationships: []
       }
+      email_templates: {
+        Row: {
+          body_html: string
+          description: string | null
+          id: string
+          is_enabled: boolean
+          subject: string
+          template_key: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          body_html?: string
+          description?: string | null
+          id?: string
+          is_enabled?: boolean
+          subject?: string
+          template_key: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          body_html?: string
+          description?: string | null
+          id?: string
+          is_enabled?: boolean
+          subject?: string
+          template_key?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       profile_history: {
         Row: {
           changed_at: string
