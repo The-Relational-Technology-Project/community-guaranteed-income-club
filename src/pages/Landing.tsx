@@ -61,9 +61,9 @@ const Landing = () => {
                   <p className="text-3xl font-bold font-display">7%</p>
                   <p className="text-xs opacity-70">of your income</p>
                 </div>
-                <div className="bg-pop/20 backdrop-blur-sm rounded-2xl p-5 flex-1">
-                  <p className="text-3xl font-bold font-display">$0</p>
-                  <p className="text-xs opacity-70">in fees or overhead</p>
+                <div className="bg-pop/20 backdrop-blur-sm rounded-2xl p-5 flex-1 text-center">
+                  <p className="text-lg font-bold font-display leading-tight">Knowing your neighbor Matt</p>
+                  <p className="text-xs opacity-70 mt-1">priceless (also free)</p>
                 </div>
               </div>
             </div>
