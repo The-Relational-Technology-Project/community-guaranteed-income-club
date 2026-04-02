@@ -207,6 +207,28 @@ const Profile = () => {
               <Label htmlFor="bio">Bio</Label>
               <Textarea id="bio" value={form.bio} onChange={(e) => update("bio", e.target.value)} rows={3} />
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="third_space">Favorite Third Space in Baltimore</Label>
+              <Input
+                id="third_space"
+                value={form.favorite_third_space}
+                onChange={(e) => update("favorite_third_space", e.target.value)}
+                placeholder="e.g. Red Emma's, Patterson Park, a walk along the harbor..."
+              />
+              <p className="text-xs text-muted-foreground">
+                A place you'd suggest for meeting another community member — a park, café, walkway, etc.
+              </p>
+            </div>
+            <div className="flex items-center gap-3 pt-2">
+              <Checkbox
+                id="open_to_in_person"
+                checked={form.open_to_in_person}
+                onCheckedChange={(checked) => setForm(prev => ({ ...prev, open_to_in_person: !!checked }))}
+              />
+              <Label htmlFor="open_to_in_person" className="text-sm font-normal cursor-pointer">
+                I'm open to exchanging money in person when possible 🤝
+              </Label>
+            </div>
             <Button type="submit" className="w-full" disabled={saving}>
               {saving ? "Saving..." : "Save Changes"}
             </Button>
