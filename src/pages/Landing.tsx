@@ -341,7 +341,7 @@ const Landing = () => {
               <span className="text-accent">caring for one another.</span>
             </h2>
             <p className="text-lg text-primary-foreground/80 mb-8">
-              Started April 2025. 20 people. Zero issues. Now 50+ and growing to 150.
+              Started April 2025 with 20 people. Now 50+ and growing to 150.
               Every person who joins makes this community stronger.
             </p>
             <Link to="/signup">
