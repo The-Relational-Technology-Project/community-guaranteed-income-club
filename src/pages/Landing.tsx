@@ -61,9 +61,9 @@ const Landing = () => {
                   <p className="text-3xl font-bold font-display">7%</p>
                   <p className="text-xs opacity-70">of your income</p>
                 </div>
-                <div className="bg-pop/20 backdrop-blur-sm rounded-2xl p-5 flex-1">
-                  <p className="text-3xl font-bold font-display">$0</p>
-                  <p className="text-xs opacity-70">in fees or overhead</p>
+                <div className="bg-pop/20 backdrop-blur-sm rounded-2xl p-5 flex-1 text-center">
+                  <p className="text-lg font-bold font-display leading-tight">Knowing your neighbor Matt</p>
+                  <p className="text-xs opacity-70 mt-1">priceless (also free)</p>
                 </div>
               </div>
             </div>
@@ -164,11 +164,11 @@ const Landing = () => {
               <div className="absolute top-4 right-4 w-20 h-20 rounded-full bg-primary-foreground/8 pointer-events-none" />
               <div className="absolute bottom-6 right-10 w-12 h-12 rounded-full bg-primary-foreground/8 pointer-events-none" />
               <p className="text-sm font-medium opacity-80 mb-1">GROUP AVERAGE</p>
-              <p className="text-5xl font-bold font-display">$2,800</p>
-              <p className="text-sm opacity-70 mt-1">monthly income</p>
+              <p className="text-5xl font-bold font-display">$2,800<span className="text-2xl opacity-70">/mo</span></p>
+              <p className="text-sm opacity-70 mt-1">≈ $33,600/year</p>
               <div className="mt-6 pt-4 border-t border-primary-foreground/20">
                 <p className="text-3xl font-bold font-display">$196</p>
-                <p className="text-sm opacity-70">equal share each</p>
+                <p className="text-sm opacity-70">equal share each month</p>
               </div>
             </div>
 
@@ -176,6 +176,7 @@ const Landing = () => {
             <div className="bg-accent text-accent-foreground rounded-3xl p-8 relative overflow-hidden">
               <div className="absolute top-4 right-4 w-20 h-20 rounded-full bg-accent-foreground/8 pointer-events-none" />
               <p className="text-sm font-medium opacity-80 mb-1">EARNING $4,000/MO</p>
+              <p className="text-xs opacity-60">($48,000/year)</p>
               <p className="text-sm opacity-80 mt-3">Puts in <span className="font-bold text-lg">$280</span> (7%)</p>
               <p className="text-sm opacity-80">Gets back <span className="font-bold text-lg">$196</span></p>
               <div className="mt-6 bg-accent-foreground/15 rounded-2xl px-5 py-4">
@@ -188,6 +189,7 @@ const Landing = () => {
             <div className="bg-fresh text-fresh-foreground rounded-3xl p-8 relative overflow-hidden">
               <div className="absolute top-4 right-4 w-20 h-20 rounded-full bg-fresh-foreground/8 pointer-events-none" />
               <p className="text-sm font-medium opacity-80 mb-1">EARNING $1,500/MO</p>
+              <p className="text-xs opacity-60">($18,000/year)</p>
               <p className="text-sm opacity-80 mt-3">Puts in <span className="font-bold text-lg">$105</span> (7%)</p>
               <p className="text-sm opacity-80">Gets back <span className="font-bold text-lg">$196</span></p>
               <div className="mt-6 bg-fresh-foreground/15 rounded-2xl px-5 py-4">
@@ -212,10 +214,10 @@ const Landing = () => {
           </div>
           <div>
             <blockquote className="text-2xl md:text-3xl font-bold font-display leading-snug mb-4">
-              "It's also a reminder that other people care and you're not on your own."
+              "We make a living by what we get. We make a life by what we give."
             </blockquote>
             <p className="text-lg opacity-80">
-              — The whole point of this thing, honestly
+              — Winston Churchill
             </p>
           </div>
         </div>
@@ -238,12 +240,12 @@ const Landing = () => {
         <div className="container mx-auto max-w-4xl relative z-10 flex flex-col md:flex-row items-center gap-12">
           <div className="flex-1">
             <h2 className="text-4xl md:text-5xl font-bold font-display mb-6 leading-tight">
-              Not to brag, but we're kind of{" "}
-              <span className="text-accent">changing how communities work.</span>
+              Let's actually practice{" "}
+              <span className="text-accent">caring for one another.</span>
             </h2>
             <p className="text-lg text-primary-foreground/80 mb-8">
               Started April 2025. 20 people. Zero issues. Now 50+ and growing to 150.
-              Every person who joins makes the whole thing stronger.
+              Every person who joins makes this community stronger.
             </p>
             <Link to="/signup">
               <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground text-xl px-14 py-7 rounded-full font-display font-bold shadow-2xl hover-wiggle">
