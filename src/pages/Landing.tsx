@@ -209,6 +209,75 @@ const Landing = () => {
               </div>
             </div>
           </div>
+          {/* Interactive Calculator */}
+          <div className="mt-12 bg-card rounded-3xl border-2 border-border/50 p-8 md:p-10">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center">
+                <Calculator className="h-6 w-6 text-primary-foreground" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold font-display">Try it yourself</h3>
+                <p className="text-sm text-muted-foreground">Plug in your numbers and see what happens</p>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <label className="text-sm font-medium text-muted-foreground mb-2 block">Your monthly post-tax income</label>
+                <div className="relative">
+                  <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="number"
+                    placeholder="e.g. 3000"
+                    value={myIncome}
+                    onChange={(e) => setMyIncome(e.target.value)}
+                    className="pl-9 text-lg h-12 rounded-xl"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground mb-2 block">Group average monthly income</label>
+                <div className="relative">
+                  <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="number"
+                    placeholder="2800"
+                    value={groupAvg}
+                    onChange={(e) => setGroupAvg(e.target.value)}
+                    className="pl-9 text-lg h-12 rounded-xl"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {hasResult && (
+              <div className="grid md:grid-cols-3 gap-4 animate-fade-in">
+                <div className="bg-secondary rounded-2xl p-5 text-center">
+                  <p className="text-xs text-muted-foreground font-medium mb-1">YOUR 7% CONTRIBUTION</p>
+                  <p className="text-3xl font-bold font-display text-primary">${myContribution.toFixed(2)}</p>
+                </div>
+                <div className="bg-secondary rounded-2xl p-5 text-center">
+                  <p className="text-xs text-muted-foreground font-medium mb-1">YOUR EQUAL SHARE</p>
+                  <p className="text-3xl font-bold font-display">${equalShare.toFixed(2)}</p>
+                </div>
+                <div className={`rounded-2xl p-5 text-center ${net > 0 ? "bg-fresh/15" : net < 0 ? "bg-accent/15" : "bg-secondary"}`}>
+                  <p className="text-xs text-muted-foreground font-medium mb-1">
+                    {net > 0 ? "YOU RECEIVE" : net < 0 ? "YOU SEND" : "BREAK EVEN"}
+                  </p>
+                  <p className={`text-3xl font-bold font-display ${net > 0 ? "text-fresh" : net < 0 ? "text-accent" : ""}`}>
+                    ${Math.abs(net).toFixed(2)}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {net > 0
+                      ? "per month from your neighbors 💛"
+                      : net < 0
+                      ? "per month to your neighbors 🤝"
+                      : "you're right at the average!"}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </section>
 
