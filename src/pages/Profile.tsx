@@ -72,7 +72,9 @@ const Profile = () => {
         profession: form.profession || null,
         employment_status: form.employment_status as any,
         bio: form.bio || null,
-      })
+        favorite_third_space: form.favorite_third_space || null,
+        open_to_in_person: form.open_to_in_person,
+      } as any)
       .eq("id", user.id);
 
     setSaving(false);
