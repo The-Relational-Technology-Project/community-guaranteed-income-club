@@ -28,6 +28,8 @@ const Profile = () => {
     profession: "",
     employment_status: "employed",
     bio: "",
+    favorite_third_space: "",
+    open_to_in_person: false,
   });
 
   useEffect(() => {
