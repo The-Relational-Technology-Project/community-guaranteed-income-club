@@ -96,6 +96,12 @@ const Roster = () => {
                     <span>{profile.zip_code}</span>
                   </div>
                 )}
+                {(profile as any).favorite_third_space && (
+                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                    <Coffee className="h-3 w-3" />
+                    <span className="truncate">{(profile as any).favorite_third_space}</span>
+                  </div>
+                )}
                 {profile.bio && (
                   <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{profile.bio}</p>
                 )}
