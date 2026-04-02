@@ -7,10 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Search, MapPin, Briefcase, CheckCircle2 } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 
-type Profile = Tables<"profiles">;
+type RosterProfile = Pick<Tables<"profiles">, "id" | "name" | "bio" | "profession" | "employment_status" | "zip_code" | "photo_url" | "is_verified" | "participant_status">;
 
 const Roster = () => {
-  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [profiles, setProfiles] = useState<RosterProfile[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
