@@ -214,10 +214,10 @@ const Landing = () => {
           </div>
           <div>
             <blockquote className="text-2xl md:text-3xl font-bold font-display leading-snug mb-4">
-              "It's also a reminder that other people care and you're not on your own."
+              "We make a living by what we get. We make a life by what we give."
             </blockquote>
             <p className="text-lg opacity-80">
-              — The whole point of this thing, honestly
+              — Winston Churchill
             </p>
           </div>
         </div>
