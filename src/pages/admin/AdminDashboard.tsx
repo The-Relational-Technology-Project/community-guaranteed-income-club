@@ -83,7 +83,7 @@ const AdminDashboard = () => {
         </TabsContent>
 
         <TabsContent value="math">
-          <AdminMathView profiles={profiles} runs={runs} />
+          <AdminMathView profiles={profiles} runs={runs} onRefresh={fetchData} />
         </TabsContent>
 
         <TabsContent value="emails">
