@@ -101,13 +101,13 @@ export type Database = {
             | null
           phone: string | null
           photo_url: string | null
-          post_tax_monthly_income: number
+          post_tax_monthly_income: number | null
           profession: string | null
           student_loan_payment: number | null
           updated_at: string
           venmo_handle: string | null
           zelle_info: string | null
-          zip_code: string
+          zip_code: string | null
         }
         Insert: {
           bio?: string | null
@@ -124,13 +124,13 @@ export type Database = {
             | null
           phone?: string | null
           photo_url?: string | null
-          post_tax_monthly_income: number
+          post_tax_monthly_income?: number | null
           profession?: string | null
           student_loan_payment?: number | null
           updated_at?: string
           venmo_handle?: string | null
           zelle_info?: string | null
-          zip_code: string
+          zip_code?: string | null
         }
         Update: {
           bio?: string | null
@@ -147,13 +147,13 @@ export type Database = {
             | null
           phone?: string | null
           photo_url?: string | null
-          post_tax_monthly_income?: number
+          post_tax_monthly_income?: number | null
           profession?: string | null
           student_loan_payment?: number | null
           updated_at?: string
           venmo_handle?: string | null
           zelle_info?: string | null
-          zip_code?: string
+          zip_code?: string | null
         }
         Relationships: []
       }
