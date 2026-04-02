@@ -299,10 +299,10 @@ const Landing = () => {
           </div>
           <div>
             <blockquote className="text-2xl md:text-3xl font-bold font-display leading-snug mb-4">
-              "We make a living by what we get. We make a life by what we give."
+              "I want to live in a society where the currency of exchange is gratitude and the infinitely renewable resource of kindness, which multiplies every time it is shared rather than depreciating with use."
             </blockquote>
             <p className="text-lg opacity-80">
-              — Winston Churchill
+              — Robin Wall Kimmerer, <em>The Serviceberry</em>
             </p>
           </div>
         </div>
