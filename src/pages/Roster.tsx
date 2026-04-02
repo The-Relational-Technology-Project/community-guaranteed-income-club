@@ -4,10 +4,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Search, MapPin, Briefcase, CheckCircle2 } from "lucide-react";
+import { Search, MapPin, Briefcase, CheckCircle2, Coffee } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 
-type RosterProfile = Pick<Tables<"profiles">, "id" | "name" | "bio" | "profession" | "employment_status" | "zip_code" | "photo_url" | "is_verified" | "participant_status">;
+type RosterProfile = Pick<Tables<"profiles">, "id" | "name" | "bio" | "profession" | "employment_status" | "zip_code" | "photo_url" | "is_verified" | "participant_status"> & {
+  favorite_third_space?: string | null;
+};
 
 const Roster = () => {
   const [profiles, setProfiles] = useState<RosterProfile[]>([]);
