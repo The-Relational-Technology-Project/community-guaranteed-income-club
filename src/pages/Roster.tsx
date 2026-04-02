@@ -20,7 +20,7 @@ const Roster = () => {
     const fetchProfiles = async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("id, name, bio, profession, employment_status, zip_code, photo_url, is_verified, participant_status")
+        .select("id, name, bio, profession, employment_status, zip_code, photo_url, is_verified, participant_status, favorite_third_space")
         .eq("participant_status", "active")
         .order("name");
       setProfiles(data ?? []);
