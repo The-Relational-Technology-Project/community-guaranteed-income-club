@@ -147,6 +147,18 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* Mid-page quote */}
+      <section className="py-12 md:py-16 px-4 bg-warm/10">
+        <div className="container mx-auto max-w-4xl text-center">
+          <blockquote className="text-xl md:text-2xl font-bold font-display leading-snug mb-3">
+            "Recognizing 'enoughness' is a radical act in an economy that is always urging us to consume more."
+          </blockquote>
+          <p className="text-sm text-muted-foreground">
+            — Robin Wall Kimmerer, <em>The Serviceberry</em>
+          </p>
+        </div>
+      </section>
+
       {/* Curved transition into math */}
       <div className="relative">
         <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full block -mb-1">
