@@ -21,7 +21,7 @@ import type { Tables } from "@/integrations/supabase/types";
 type Transaction = Tables<"transactions">;
 type Profile = Tables<"profiles">;
 
-interface TransactionWithProfiles extends Transaction {
+interface TransactionWithProfiles extends Omit<Transaction, 'sender_open_to_meet' | 'receiver_open_to_meet'> {
   sender: Profile & { favorite_third_space?: string | null; open_to_in_person?: boolean };
   receiver: Profile & { favorite_third_space?: string | null; open_to_in_person?: boolean };
   sender_open_to_meet?: boolean;
