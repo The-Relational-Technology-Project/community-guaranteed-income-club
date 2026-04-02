@@ -240,12 +240,12 @@ const Landing = () => {
         <div className="container mx-auto max-w-4xl relative z-10 flex flex-col md:flex-row items-center gap-12">
           <div className="flex-1">
             <h2 className="text-4xl md:text-5xl font-bold font-display mb-6 leading-tight">
-              Not to brag, but we're kind of{" "}
-              <span className="text-accent">changing how communities work.</span>
+              Let's actually practice{" "}
+              <span className="text-accent">caring for one another.</span>
             </h2>
             <p className="text-lg text-primary-foreground/80 mb-8">
               Started April 2025. 20 people. Zero issues. Now 50+ and growing to 150.
-              Every person who joins makes the whole thing stronger.
+              Every person who joins makes this community stronger.
             </p>
             <Link to="/signup">
               <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground text-xl px-14 py-7 rounded-full font-display font-bold shadow-2xl hover-wiggle">
