@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -9,8 +10,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowDown, ArrowUp, Calculator, Equal, Percent } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { ArrowDown, ArrowUp, Calculator, Equal, Percent, Play, Loader2 } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Profile = Tables<"profiles">;
@@ -19,23 +30,20 @@ type CalcRun = Tables<"calculation_runs">;
 interface AdminMathViewProps {
   profiles: Profile[];
   runs: CalcRun[];
+  onRefresh?: () => void;
 }
 
-const AdminMathView = ({ profiles, runs }: AdminMathViewProps) => {
-  const [selectedRunId, setSelectedRunId] = useState<string>(runs[0]?.id ?? "preview");
+const AdminMathView = ({ profiles, runs, onRefresh }: AdminMathViewProps) => {
+  const { user } = useAuth();
+  const [running, setRunning] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const activeProfiles = profiles.filter((p) => p.participant_status === "active");
 
-  // Calculate the math for display
   const contributions = activeProfiles.map((p) => {
     const income = Number(p.post_tax_monthly_income ?? 0);
     const contribution = income * 0.07;
-    return {
-      id: p.id,
-      name: p.name,
-      income,
-      contribution,
-    };
+    return { id: p.id, name: p.name, income, contribution, venmo_handle: p.venmo_handle };
   });
 
   const totalPool = contributions.reduce((sum, c) => sum + c.contribution, 0);
@@ -50,14 +58,174 @@ const AdminMathView = ({ profiles, runs }: AdminMathViewProps) => {
       net: equalShare - c.contribution,
       role: equalShare - c.contribution > 0.01 ? "receiver" : equalShare - c.contribution < -0.01 ? "sender" : "neutral",
     }))
-    .sort((a, b) => a.net - b.net); // senders first
+    .sort((a, b) => a.net - b.net);
 
   const senders = breakdown.filter((b) => b.role === "sender");
   const receivers = breakdown.filter((b) => b.role === "receiver");
   const neutrals = breakdown.filter((b) => b.role === "neutral");
 
+  const lastRun = runs[0];
+  const lastRunDate = lastRun ? new Date(lastRun.run_date) : null;
+  const now = new Date();
+  const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const alreadyRanThisMonth = lastRunDate && lastRunDate >= currentMonthStart;
+
+  const runCalculation = async () => {
+    setRunning(true);
+    setShowConfirm(false);
+
+    try {
+      const { data: active } = await supabase
+        .from("profiles")
+        .select("id, post_tax_monthly_income, venmo_handle")
+        .eq("participant_status", "active");
+
+      if (!active || active.length < 2) {
+        toast({ title: "Need at least 2 active participants", variant: "destructive" });
+        setRunning(false);
+        return;
+      }
+
+      const contribs = active.map((p) => ({
+        id: p.id,
+        income: Number(p.post_tax_monthly_income),
+        contribution: Number(p.post_tax_monthly_income) * 0.07,
+        venmo_handle: p.venmo_handle,
+      }));
+
+      const pool = contribs.reduce((sum, c) => sum + c.contribution, 0);
+      const share = pool / contribs.length;
+      const avgIncome = contribs.reduce((sum, c) => sum + c.income, 0) / contribs.length;
+
+      const nets = contribs.map((c) => ({ ...c, net: share - c.contribution }));
+
+      const sendersCalc = nets.filter((n) => n.net < 0).map((n) => ({ ...n, remaining: Math.abs(n.net) }));
+      const receiversCalc = nets.filter((n) => n.net > 0).map((n) => ({ ...n, remaining: n.net }));
+
+      sendersCalc.sort((a, b) => b.remaining - a.remaining);
+      receiversCalc.sort((a, b) => b.remaining - a.remaining);
+
+      const txns: { sender_id: string; receiver_id: string; amount: number; venmo_deep_link: string | null }[] = [];
+      let si = 0, ri = 0;
+
+      while (si < sendersCalc.length && ri < receiversCalc.length) {
+        const amount = Math.min(sendersCalc[si].remaining, receiversCalc[ri].remaining);
+        if (amount > 0.01) {
+          const receiverVenmo = receiversCalc[ri].venmo_handle;
+          const venmoLink = receiverVenmo
+            ? `https://venmo.com/${receiverVenmo.replace("@", "")}?txn=pay&amount=${amount.toFixed(2)}&note=Community%20redistribution`
+            : null;
+
+          txns.push({
+            sender_id: sendersCalc[si].id,
+            receiver_id: receiversCalc[ri].id,
+            amount: Math.round(amount * 100) / 100,
+            venmo_deep_link: venmoLink,
+          });
+        }
+        sendersCalc[si].remaining -= amount;
+        receiversCalc[ri].remaining -= amount;
+        if (sendersCalc[si].remaining < 0.01) si++;
+        if (receiversCalc[ri].remaining < 0.01) ri++;
+      }
+
+      const today = new Date();
+      const runDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-01`;
+
+      const { data: run, error: runError } = await supabase
+        .from("calculation_runs")
+        .insert({
+          run_date: runDate,
+          status: "finalized" as any,
+          participant_count: contribs.length,
+          total_pool: pool,
+          average_income: avgIncome,
+          created_by: user?.id,
+        })
+        .select()
+        .single();
+
+      if (runError || !run) throw runError;
+
+      if (txns.length > 0) {
+        const { error: txnError } = await supabase
+          .from("transactions")
+          .insert(txns.map((t) => ({ ...t, run_id: run.id })));
+        if (txnError) throw txnError;
+      }
+
+      toast({ title: "Calculation complete!", description: `${txns.length} transactions created for ${contribs.length} participants.` });
+      onRefresh?.();
+    } catch (err: any) {
+      toast({ title: "Calculation failed", description: err?.message ?? "Unknown error", variant: "destructive" });
+    } finally {
+      setRunning(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
+      {/* Run Calculation Button */}
+      <Card className="border-accent/30 bg-accent/5">
+        <CardContent className="pt-6 pb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h3 className="font-bold text-lg font-display flex items-center gap-2">
+              <Play className="h-5 w-5 text-accent" />
+              Run Monthly Calculation
+            </h3>
+            <p className="text-sm text-muted-foreground mt-1">
+              {alreadyRanThisMonth
+                ? `Already ran for ${currentMonthStart.toLocaleDateString("en-US", { month: "long", year: "numeric" })}. Running again will create duplicate transactions.`
+                : `Ready to run for ${currentMonthStart.toLocaleDateString("en-US", { month: "long", year: "numeric" })}. This will create transactions for ${activeProfiles.length} active members.`}
+            </p>
+            {lastRun && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Last run: {new Date(lastRun.run_date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })} · {lastRun.participant_count} participants · ${Number(lastRun.total_pool).toLocaleString()} pool
+              </p>
+            )}
+          </div>
+          <Button
+            onClick={() => setShowConfirm(true)}
+            disabled={running}
+            className="bg-accent hover:bg-accent/90 text-accent-foreground font-bold gap-2 min-w-[180px]"
+            size="lg"
+          >
+            {running ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
+            {running ? "Running..." : alreadyRanThisMonth ? "Run Again" : "Run Now"}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Confirm Dialog */}
+      <Dialog open={showConfirm} onOpenChange={setShowConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Run monthly calculation?</DialogTitle>
+            <DialogDescription>
+              This will calculate redistribution amounts for {activeProfiles.length} active participants and create transactions.
+              {alreadyRanThisMonth && (
+                <span className="block mt-2 text-destructive font-medium">
+                  ⚠️ A calculation was already run this month. Running again will create duplicate transactions.
+                </span>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="text-sm space-y-1 bg-muted p-3 rounded-md">
+            <p><strong>Participants:</strong> {activeProfiles.length}</p>
+            <p><strong>Estimated Pool:</strong> ${totalPool.toFixed(2)}</p>
+            <p><strong>Equal Share:</strong> ${equalShare.toFixed(2)}</p>
+            <p><strong>Senders:</strong> {senders.length} · <strong>Receivers:</strong> {receivers.length}</p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowConfirm(false)}>Cancel</Button>
+            <Button onClick={runCalculation} className="bg-accent hover:bg-accent/90 text-accent-foreground gap-2">
+              <Play className="h-4 w-4" />
+              Confirm & Run
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Algorithm Explanation */}
       <Card className="border-primary/20 bg-primary/5">
         <CardHeader>
@@ -65,40 +233,24 @@ const AdminMathView = ({ profiles, runs }: AdminMathViewProps) => {
             <Calculator className="h-5 w-5" />
             How the Math Works
           </CardTitle>
-          <CardDescription>
-            Transparency into the redistribution algorithm
-          </CardDescription>
+          <CardDescription>Transparency into the redistribution algorithm</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
-            <div className="flex items-start gap-2">
-              <div className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold flex-shrink-0">1</div>
-              <div>
-                <p className="font-medium">Collect 7%</p>
-                <p className="text-muted-foreground">Each participant contributes 7% of their post-tax monthly income</p>
+            {[
+              { step: "1", title: "Collect 7%", desc: "Each participant contributes 7% of their post-tax monthly income" },
+              { step: "2", title: "Pool the money", desc: "All contributions go into a shared pool" },
+              { step: "3", title: "Divide equally", desc: "The pool is divided equally among all participants" },
+              { step: "4", title: "Net difference", desc: 'If share > contribution → receive. If share < contribution → send.' },
+            ].map((s) => (
+              <div key={s.step} className="flex items-start gap-2">
+                <div className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold flex-shrink-0">{s.step}</div>
+                <div>
+                  <p className="font-medium">{s.title}</p>
+                  <p className="text-muted-foreground">{s.desc}</p>
+                </div>
               </div>
-            </div>
-            <div className="flex items-start gap-2">
-              <div className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold flex-shrink-0">2</div>
-              <div>
-                <p className="font-medium">Pool the money</p>
-                <p className="text-muted-foreground">All contributions go into a shared pool</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-2">
-              <div className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold flex-shrink-0">3</div>
-              <div>
-                <p className="font-medium">Divide equally</p>
-                <p className="text-muted-foreground">The pool is divided equally among all participants</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-2">
-              <div className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold flex-shrink-0">4</div>
-              <div>
-                <p className="font-medium">Net difference</p>
-                <p className="text-muted-foreground">If share {">"} contribution → receive. If share {"<"} contribution → send.</p>
-              </div>
-            </div>
+            ))}
           </div>
         </CardContent>
       </Card>
@@ -154,9 +306,7 @@ const AdminMathView = ({ profiles, runs }: AdminMathViewProps) => {
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Per-Person Breakdown (Live Preview)</CardTitle>
-          <CardDescription>
-            Based on current active participants' income data. This is what would happen if you ran the calculation now.
-          </CardDescription>
+          <CardDescription>Based on current active participants' income data. This is what would happen if you ran the calculation now.</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
@@ -175,12 +325,8 @@ const AdminMathView = ({ profiles, runs }: AdminMathViewProps) => {
                 <TableRow key={row.id}>
                   <TableCell className="font-medium">{row.name}</TableCell>
                   <TableCell className="text-right">${row.income.toLocaleString()}</TableCell>
-                  <TableCell className="text-right text-muted-foreground">
-                    ${row.contribution.toFixed(2)}
-                  </TableCell>
-                  <TableCell className="text-right text-muted-foreground">
-                    ${equalShare.toFixed(2)}
-                  </TableCell>
+                  <TableCell className="text-right text-muted-foreground">${row.contribution.toFixed(2)}</TableCell>
+                  <TableCell className="text-right text-muted-foreground">${equalShare.toFixed(2)}</TableCell>
                   <TableCell className={`text-right font-medium ${row.net > 0 ? "text-green-600 dark:text-green-400" : row.net < 0 ? "text-red-600 dark:text-red-400" : ""}`}>
                     {row.net > 0 ? "+" : ""}{row.net.toFixed(2)}
                   </TableCell>
@@ -198,7 +344,7 @@ const AdminMathView = ({ profiles, runs }: AdminMathViewProps) => {
         </CardContent>
       </Card>
 
-      {/* Formula Summary */}
+      {/* Formula */}
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Formula</CardTitle>
