@@ -223,7 +223,11 @@ const Landing = () => {
 
             <div className="grid md:grid-cols-2 gap-6 mb-6">
               <div>
-                <label className="text-sm font-medium text-muted-foreground mb-2 block">Your monthly post-tax income</label>
+                <label className="text-sm font-medium text-muted-foreground mb-1 block">Your monthly post-tax income</label>
+                {myIncomeNum > 0 && (
+                  <p className="text-xs text-muted-foreground mb-2">= ${(myIncomeNum * 12).toLocaleString()}/year</p>
+                )}
+                {!myIncomeNum && <p className="text-xs text-muted-foreground mb-2 opacity-0">placeholder</p>}
                 <div className="relative">
                   <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -236,7 +240,8 @@ const Landing = () => {
                 </div>
               </div>
               <div>
-                <label className="text-sm font-medium text-muted-foreground mb-2 block">Group average monthly income</label>
+                <label className="text-sm font-medium text-muted-foreground mb-1 block">Group average monthly income</label>
+                <p className="text-xs text-muted-foreground mb-2">= ${(groupAvgNum * 12).toLocaleString()}/year</p>
                 <div className="relative">
                   <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
