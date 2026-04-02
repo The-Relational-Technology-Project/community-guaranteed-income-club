@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Camera } from "lucide-react";
 
 const Profile = () => {
@@ -28,6 +29,8 @@ const Profile = () => {
     profession: "",
     employment_status: "employed",
     bio: "",
+    favorite_third_space: "",
+    open_to_in_person: false,
   });
 
   useEffect(() => {
@@ -43,6 +46,8 @@ const Profile = () => {
         profession: profile.profession ?? "",
         employment_status: profile.employment_status ?? "employed",
         bio: profile.bio ?? "",
+        favorite_third_space: (profile as any).favorite_third_space ?? "",
+        open_to_in_person: (profile as any).open_to_in_person ?? false,
       });
     }
   }, [profile]);
@@ -68,7 +73,9 @@ const Profile = () => {
         profession: form.profession || null,
         employment_status: form.employment_status as any,
         bio: form.bio || null,
-      })
+        favorite_third_space: form.favorite_third_space || null,
+        open_to_in_person: form.open_to_in_person,
+      } as any)
       .eq("id", user.id);
 
     setSaving(false);
@@ -200,6 +207,28 @@ const Profile = () => {
             <div className="space-y-2">
               <Label htmlFor="bio">Bio</Label>
               <Textarea id="bio" value={form.bio} onChange={(e) => update("bio", e.target.value)} rows={3} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="third_space">Favorite Third Space in Baltimore</Label>
+              <Input
+                id="third_space"
+                value={form.favorite_third_space}
+                onChange={(e) => update("favorite_third_space", e.target.value)}
+                placeholder="e.g. Red Emma's, Patterson Park, a walk along the harbor..."
+              />
+              <p className="text-xs text-muted-foreground">
+                A place you'd suggest for meeting another community member — a park, café, walkway, etc.
+              </p>
+            </div>
+            <div className="flex items-center gap-3 pt-2">
+              <Checkbox
+                id="open_to_in_person"
+                checked={form.open_to_in_person}
+                onCheckedChange={(checked) => setForm(prev => ({ ...prev, open_to_in_person: !!checked }))}
+              />
+              <Label htmlFor="open_to_in_person" className="text-sm font-normal cursor-pointer">
+                I'm open to exchanging money in person when possible 🤝
+              </Label>
             </div>
             <Button type="submit" className="w-full" disabled={saving}>
               {saving ? "Saving..." : "Save Changes"}

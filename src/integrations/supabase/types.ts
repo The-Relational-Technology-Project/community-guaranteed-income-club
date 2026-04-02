@@ -126,9 +126,11 @@ export type Database = {
           employment_status:
             | Database["public"]["Enums"]["employment_status"]
             | null
+          favorite_third_space: string | null
           id: string
           is_verified: boolean | null
           name: string
+          open_to_in_person: boolean | null
           participant_status:
             | Database["public"]["Enums"]["participant_status"]
             | null
@@ -149,9 +151,11 @@ export type Database = {
           employment_status?:
             | Database["public"]["Enums"]["employment_status"]
             | null
+          favorite_third_space?: string | null
           id: string
           is_verified?: boolean | null
           name: string
+          open_to_in_person?: boolean | null
           participant_status?:
             | Database["public"]["Enums"]["participant_status"]
             | null
@@ -172,9 +176,11 @@ export type Database = {
           employment_status?:
             | Database["public"]["Enums"]["employment_status"]
             | null
+          favorite_third_space?: string | null
           id?: string
           is_verified?: boolean | null
           name?: string
+          open_to_in_person?: boolean | null
           participant_status?:
             | Database["public"]["Enums"]["participant_status"]
             | null
@@ -200,8 +206,10 @@ export type Database = {
           is_confirmed_receiver: boolean | null
           is_confirmed_sender: boolean | null
           receiver_id: string
+          receiver_open_to_meet: boolean | null
           run_id: string
           sender_id: string
+          sender_open_to_meet: boolean | null
           venmo_deep_link: string | null
         }
         Insert: {
@@ -213,8 +221,10 @@ export type Database = {
           is_confirmed_receiver?: boolean | null
           is_confirmed_sender?: boolean | null
           receiver_id: string
+          receiver_open_to_meet?: boolean | null
           run_id: string
           sender_id: string
+          sender_open_to_meet?: boolean | null
           venmo_deep_link?: string | null
         }
         Update: {
@@ -226,8 +236,10 @@ export type Database = {
           is_confirmed_receiver?: boolean | null
           is_confirmed_sender?: boolean | null
           receiver_id?: string
+          receiver_open_to_meet?: boolean | null
           run_id?: string
           sender_id?: string
+          sender_open_to_meet?: boolean | null
           venmo_deep_link?: string | null
         }
         Relationships: [

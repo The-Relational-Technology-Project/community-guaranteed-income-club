@@ -4,10 +4,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Search, MapPin, Briefcase, CheckCircle2 } from "lucide-react";
+import { Search, MapPin, Briefcase, CheckCircle2, Coffee } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 
-type RosterProfile = Pick<Tables<"profiles">, "id" | "name" | "bio" | "profession" | "employment_status" | "zip_code" | "photo_url" | "is_verified" | "participant_status">;
+type RosterProfile = Pick<Tables<"profiles">, "id" | "name" | "bio" | "profession" | "employment_status" | "zip_code" | "photo_url" | "is_verified" | "participant_status"> & {
+  favorite_third_space?: string | null;
+};
 
 const Roster = () => {
   const [profiles, setProfiles] = useState<RosterProfile[]>([]);
@@ -18,7 +20,7 @@ const Roster = () => {
     const fetchProfiles = async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("id, name, bio, profession, employment_status, zip_code, photo_url, is_verified, participant_status")
+        .select("id, name, bio, profession, employment_status, zip_code, photo_url, is_verified, participant_status, favorite_third_space")
         .eq("participant_status", "active")
         .order("name");
       setProfiles(data ?? []);
@@ -92,6 +94,12 @@ const Roster = () => {
                   <div className="flex items-center gap-1 text-sm text-muted-foreground">
                     <MapPin className="h-3 w-3" />
                     <span>{profile.zip_code}</span>
+                  </div>
+                )}
+                {(profile as any).favorite_third_space && (
+                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                    <Coffee className="h-3 w-3" />
+                    <span className="truncate">{(profile as any).favorite_third_space}</span>
                   </div>
                 )}
                 {profile.bio && (
