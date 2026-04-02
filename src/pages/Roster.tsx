@@ -94,11 +94,6 @@ const Roster = () => {
                     <span>{profile.zip_code}</span>
                   </div>
                 )}
-                {profile.employment_status && (
-                  <Badge variant="secondary" className="mt-1 text-xs">
-                    {formatStatus(profile.employment_status)}
-                  </Badge>
-                )}
                 {profile.bio && (
                   <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{profile.bio}</p>
                 )}
