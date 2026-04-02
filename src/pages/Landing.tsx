@@ -5,6 +5,15 @@ import { Input } from "@/components/ui/input";
 import { Users, ArrowLeftRight, Heart, DollarSign, ArrowRight, HandHeart, Handshake, CircleDollarSign, Calculator } from "lucide-react";
 
 const Landing = () => {
+  const [myIncome, setMyIncome] = useState("");
+  const [groupAvg, setGroupAvg] = useState("2800");
+
+  const myIncomeNum = Number(myIncome) || 0;
+  const groupAvgNum = Number(groupAvg) || 2800;
+  const myContribution = myIncomeNum * 0.07;
+  const equalShare = groupAvgNum * 0.07;
+  const net = equalShare - myContribution;
+  const hasResult = myIncomeNum > 0;
   return (
     <div className="overflow-hidden">
       {/* Hero — Full width, content spread across */}
