@@ -45,6 +45,8 @@ const Profile = () => {
         profession: profile.profession ?? "",
         employment_status: profile.employment_status ?? "employed",
         bio: profile.bio ?? "",
+        favorite_third_space: (profile as any).favorite_third_space ?? "",
+        open_to_in_person: (profile as any).open_to_in_person ?? false,
       });
     }
   }, [profile]);
