@@ -83,11 +83,10 @@ const MemberHome = () => {
 
   const confirmSend = async () => {
     if (!thisMonth) return;
-    const update: Record<string, any> = {
-      is_confirmed_sender: true,
-      confirmed_sender_at: new Date().toISOString(),
-    };
-    const { error } = await supabase.from("transactions").update(update).eq("id", thisMonth.id);
+    const { error } = await supabase
+      .from("transactions")
+      .update({ is_confirmed_sender: true, confirmed_sender_at: new Date().toISOString() })
+      .eq("id", thisMonth.id);
     if (error) {
       toast({ title: "Couldn't update", description: error.message, variant: "destructive" });
     } else {
