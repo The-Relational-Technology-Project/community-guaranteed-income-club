@@ -87,9 +87,13 @@ const Transactions = () => {
     const field = role === "sender" ? "is_confirmed_sender" : "is_confirmed_receiver";
     const timeField = role === "sender" ? "confirmed_sender_at" : "confirmed_receiver_at";
 
+    const update =
+      role === "sender"
+        ? { is_confirmed_sender: true, confirmed_sender_at: new Date().toISOString() }
+        : { is_confirmed_receiver: true, confirmed_receiver_at: new Date().toISOString() };
     const { error } = await supabase
       .from("transactions")
-      .update({ [field]: true, [timeField]: new Date().toISOString() })
+      .update(update)
       .eq("id", txnId);
 
     if (error) {

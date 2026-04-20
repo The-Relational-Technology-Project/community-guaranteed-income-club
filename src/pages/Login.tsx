@@ -22,7 +22,18 @@ const Login = () => {
     if (error) {
       toast({ title: "Error signing in", description: error.message, variant: "destructive" });
     } else {
-      navigate("/roster");
+      navigate("/home");
+    }
+  };
+
+  const demoAsMaya = async () => {
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({ email: "maya@test.com", password: "test1234" });
+    setLoading(false);
+    if (error) {
+      toast({ title: "Demo login failed", description: error.message, variant: "destructive" });
+    } else {
+      navigate("/home");
     }
   };
 
@@ -55,10 +66,19 @@ const Login = () => {
                 required
               />
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button type="submit" className="w-full rounded-full" disabled={loading}>
               {loading ? "Signing in..." : "Sign In"}
             </Button>
           </form>
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full mt-3 rounded-full border-accent/40"
+            onClick={demoAsMaya}
+            disabled={loading}
+          >
+            ✨ Demo as Maya
+          </Button>
           <p className="mt-4 text-center text-sm text-muted-foreground">
             Don't have an account?{" "}
             <Link to="/signup" className="text-primary hover:underline">

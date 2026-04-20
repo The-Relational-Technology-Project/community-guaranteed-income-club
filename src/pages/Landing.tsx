@@ -2,7 +2,9 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Users, ArrowLeftRight, Heart, DollarSign, ArrowRight, HandHeart, Handshake, CircleDollarSign, Calculator } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { ArrowRight, Heart, MessageCircle, Calendar, Check } from "lucide-react";
+import crest from "@/assets/crest.png";
 
 const Landing = () => {
   const [myIncome, setMyIncome] = useState("");
@@ -14,369 +16,171 @@ const Landing = () => {
   const equalShare = groupAvgNum * 0.07;
   const net = equalShare - myContribution;
   const hasResult = myIncomeNum > 0;
+
   return (
-    <div className="overflow-hidden">
-      {/* Hero — Full width, content spread across */}
-      <section className="relative bg-primary text-primary-foreground">
-        <div className="absolute inset-0 pattern-dots opacity-[0.06] pointer-events-none" />
+    <div>
+      {/* Hero */}
+      <section className="relative">
+        <div className="absolute inset-0 pattern-dots opacity-40 pointer-events-none" />
+        <div className="container mx-auto max-w-5xl px-4 pt-16 md:pt-24 pb-16 relative">
+          <div className="text-center">
+            <img src={crest} alt="Baltimore Mutualist Club crest" className="h-24 w-24 md:h-28 md:w-28 mx-auto mb-6 rounded-full ring-2 ring-accent/40 bg-card object-cover shadow-md" />
+            <p className="text-sm uppercase tracking-[0.25em] text-muted-foreground mb-4">The Baltimore Mutualist Club</p>
+            <h1 className="font-serif text-5xl md:text-7xl leading-[1.05] text-foreground max-w-4xl mx-auto">
+              A community of Baltimoreans who actually <em className="text-accent">show up</em> for each other.
+            </h1>
+            <p className="text-lg md:text-xl text-muted-foreground mt-6 max-w-2xl mx-auto leading-relaxed">
+              Not a charity. Not an app. A circle of neighbors who pool a bit each month, eat together,
+              and quietly carry each other through.
+            </p>
 
-        {/* Decorative circles — spread across both sides */}
-        <div className="absolute top-16 right-[8%] w-44 h-44 rounded-full border-[3px] border-primary-foreground/10 pointer-events-none" />
-        <div className="absolute top-24 right-[12%] w-28 h-28 rounded-full border-[3px] border-primary-foreground/10 pointer-events-none" />
-        <div className="absolute bottom-20 right-[15%] w-64 h-64 rounded-full bg-accent/15 pointer-events-none" />
-        <div className="absolute top-32 left-[60%] w-16 h-16 rounded-full bg-pop/20 pointer-events-none" />
-
-        <div className="container mx-auto max-w-6xl px-4 pt-20 pb-28 md:pt-28 md:pb-36 relative z-10">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div>
-              <div className="inline-flex items-center gap-2 bg-primary-foreground/15 backdrop-blur-sm font-medium px-5 py-2.5 rounded-full text-sm mb-8">
-                <Heart className="h-4 w-4 fill-current" />
-                50+ neighbors · $0 overhead · 100% community
-              </div>
-
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 font-display leading-[0.95]">
-                We take care
-                <br />
-                of each other.
-              </h1>
-
-              <p className="text-lg md:text-xl text-primary-foreground/80 mb-10 leading-relaxed max-w-lg">
-                7% of your income goes into a shared pot. The pot gets split equally.
-                That's it. Just neighbors being neighbors in Baltimore.
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link to="/signup">
-                  <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground text-lg px-10 py-6 rounded-full font-display font-bold shadow-xl hover-wiggle gap-2">
-                    Join the Movement
-                    <ArrowRight className="h-5 w-5" />
-                  </Button>
-                </Link>
-                <Link to="/about">
-                  <Button size="lg" className="text-lg px-10 py-6 rounded-full font-display font-semibold border-2 border-primary-foreground/30 bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20">
-                    Learn More
-                  </Button>
-                </Link>
-              </div>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center mt-10">
+              <Link to="/signup">
+                <Button size="lg" className="rounded-full text-base px-8 gap-2">
+                  Join the Club <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+              <Link to="/signup">
+                <Button size="lg" variant="outline" className="rounded-full text-base px-8 gap-2 border-primary/30">
+                  <MessageCircle className="h-4 w-4" /> Chat with a member
+                </Button>
+              </Link>
             </div>
 
-            {/* Right side — big stat/impact panel */}
-            <div className="hidden md:flex flex-col gap-4 items-end">
-              <div className="bg-primary-foreground/10 backdrop-blur-sm rounded-3xl p-8 max-w-sm w-full">
-                <p className="text-sm font-medium opacity-70 mb-1">REDISTRIBUTED SO FAR</p>
-                <p className="text-5xl font-bold font-display">$12,400+</p>
-                <p className="text-sm opacity-70 mt-1">across 50+ Baltimoreans</p>
-              </div>
-              <div className="flex gap-4 w-full max-w-sm">
-                <div className="bg-accent/20 backdrop-blur-sm rounded-2xl p-5 flex-1">
-                  <p className="text-3xl font-bold font-display">7%</p>
-                  <p className="text-xs opacity-70">of your income</p>
-                </div>
-                <div className="bg-pop/20 backdrop-blur-sm rounded-2xl p-5 flex-1 text-center">
-                  <p className="text-lg font-bold font-display leading-tight">Knowing your neighbor Matt</p>
-                  <p className="text-xs opacity-70 mt-1">priceless (also free)</p>
-                </div>
-              </div>
-            </div>
+            <p className="font-serif italic text-sm text-muted-foreground mt-10">
+              susu · tanda · hui · kye · tanomoshi — we're carrying it forward.
+            </p>
           </div>
-        </div>
-
-        {/* Curved transition out of hero */}
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full block">
-            <path d="M0 80V30C240 60 480 75 720 65C960 55 1200 30 1440 20V80H0Z" fill="hsl(var(--secondary))" fillOpacity="0.5" />
-            <path d="M0 80V50C360 70 720 80 1080 65C1260 57 1350 45 1440 40V80H0Z" fill="hsl(var(--background))" />
-          </svg>
         </div>
       </section>
 
-      {/* How It Works — Flowing layout */}
-      <section className="py-16 md:py-24 px-4 relative">
-        <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-14">
-            <h2 className="text-4xl md:text-5xl font-bold font-display mb-3">
-              Four steps. No catch.
-            </h2>
-            <p className="text-muted-foreground text-lg max-w-lg mx-auto">
-              Dead simple, radically generous, genuinely human.
+      {/* Stats strip */}
+      <section className="bg-primary text-primary-foreground py-10">
+        <div className="container mx-auto max-w-5xl px-4 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+          {[
+            ["50+", "members"],
+            ["$23k+", "moved between neighbors"],
+            ["12", "monthly gatherings"],
+            ["100%", "of payments completed"],
+          ].map(([n, l]) => (
+            <div key={l}>
+              <p className="font-serif text-3xl md:text-4xl text-accent">{n}</p>
+              <p className="text-xs uppercase tracking-wider opacity-80 mt-1">{l}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* The new story */}
+      <section className="py-20">
+        <div className="container mx-auto max-w-3xl px-4 text-center">
+          <p className="text-xs uppercase tracking-[0.25em] text-accent mb-4">The story</p>
+          <h2 className="font-serif text-4xl md:text-5xl leading-tight">
+            There are people who care enough about each other that they're willing to join this.
+          </h2>
+          <div className="mt-8 space-y-5 text-lg text-muted-foreground leading-relaxed">
+            <p>
+              <strong className="text-foreground">100% of peer-to-peer payments actually get made.</strong>
+              {" "}Not because of contracts. Because we know each other's names.
+            </p>
+            <p>
+              We have fun, and we show up for each other. There are gatherings every month —
+              potlucks, skill shares, Sunday coffee, kids running around.
+            </p>
+            <p className="font-serif italic text-foreground">
+              "All flourishing is mutual." — Robin Wall Kimmerer
             </p>
           </div>
+        </div>
+      </section>
 
-          {/* Alternating layout for flow */}
-          <div className="space-y-6 md:space-y-0 md:grid md:grid-cols-2 md:gap-6">
+      {/* How it works */}
+      <section className="bg-secondary/40 py-20">
+        <div className="container mx-auto max-w-5xl px-4">
+          <div className="text-center mb-12">
+            <p className="text-xs uppercase tracking-[0.25em] text-accent mb-3">How it works</p>
+            <h2 className="font-serif text-4xl">No middleman. Just neighbors.</h2>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
             {[
-              {
-                icon: Users,
-                title: "Sign up & get verified",
-                desc: "Create your account and share a bit about yourself. Someone already in the group vouches for you. Welcome to the family.",
-                bg: "bg-primary",
-              },
-              {
-                icon: CircleDollarSign,
-                title: "7% goes into the pot",
-                desc: "Every month, 7% of your post-tax income goes into the community pool. Same percentage for everyone. Fair and square.",
-                bg: "bg-accent",
-              },
-              {
-                icon: ArrowLeftRight,
-                title: "Split it equally",
-                desc: "The whole pot gets divided by the number of people. Earn above average? You send a little. Below? You receive a little.",
-                bg: "bg-fresh",
-              },
-              {
-                icon: Handshake,
-                title: "Actually meet each other",
-                desc: "You'll know who you're paired with. Say hi. Grab coffee. This isn't just money — it's relationships.",
-                bg: "bg-warm",
-              },
-            ].map((step, i) => (
-              <div
-                key={i}
-                className={`group bg-card rounded-2xl border-2 border-border/50 p-7 hover-pop flex gap-5 items-start ${i === 1 ? "md:mt-8" : i === 3 ? "md:mt-8" : ""}`}
-              >
-                <div className={`w-14 h-14 ${step.bg} rounded-2xl flex items-center justify-center shadow-sm flex-shrink-0 group-hover:scale-110 transition-transform`}>
-                  <step.icon className="h-7 w-7 text-primary-foreground" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-xl mb-2 font-display">{step.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{step.desc}</p>
-                </div>
-              </div>
+              { title: "You share what you have", body: "Each month members contribute 7% of post-tax income — directly, person to person." },
+              { title: "We do the math, gently", body: "On the 1st, the steward calculates who sends to whom. No pool, no overhead, no gatekeepers." },
+              { title: "You meet your neighbor", body: "You Venmo or Zelle a real person — and often, you end up sharing a meal with them." },
+            ].map((s, i) => (
+              <Card key={s.title} className="hover-pop">
+                <CardContent className="p-6">
+                  <p className="font-serif text-accent text-3xl">0{i + 1}</p>
+                  <h3 className="font-serif text-xl mt-2">{s.title}</h3>
+                  <p className="text-muted-foreground mt-2 text-sm leading-relaxed">{s.body}</p>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Mid-page quote */}
-      <section className="py-12 md:py-16 px-4 bg-warm/10">
-        <div className="container mx-auto max-w-4xl text-center">
-          <blockquote className="text-xl md:text-2xl font-bold font-display leading-snug mb-3">
-            "Recognizing 'enoughness' is a radical act in an economy that is always urging us to consume more."
-          </blockquote>
-          <p className="text-sm text-muted-foreground">
-            — Robin Wall Kimmerer, <em>The Serviceberry</em>
+      {/* Calculator */}
+      <section className="py-20">
+        <div className="container mx-auto max-w-2xl px-4">
+          <div className="text-center mb-8">
+            <p className="text-xs uppercase tracking-[0.25em] text-accent mb-3">See the math</p>
+            <h2 className="font-serif text-4xl">What would your month look like?</h2>
+          </div>
+          <Card>
+            <CardContent className="p-6 md:p-8 space-y-5">
+              <div>
+                <label className="text-sm text-muted-foreground">Your post-tax monthly income</label>
+                <Input
+                  type="number"
+                  value={myIncome}
+                  onChange={(e) => setMyIncome(e.target.value)}
+                  placeholder="e.g. 3500"
+                  className="mt-1 text-lg"
+                />
+              </div>
+              <div>
+                <label className="text-sm text-muted-foreground">Estimated club average</label>
+                <Input
+                  type="number"
+                  value={groupAvg}
+                  onChange={(e) => setGroupAvg(e.target.value)}
+                  className="mt-1 text-lg"
+                />
+              </div>
+              {hasResult && (
+                <div className="pt-4 border-t border-border space-y-3">
+                  <div className="flex justify-between"><span className="text-muted-foreground">You'd contribute</span><span className="font-serif text-lg">${myContribution.toFixed(0)}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">Equal share</span><span className="font-serif text-lg">${equalShare.toFixed(0)}</span></div>
+                  <div className="flex justify-between items-center pt-3 border-t">
+                    <span className="font-serif text-lg">{net >= 0 ? "You'd receive" : "You'd send"}</span>
+                    <span className={`font-serif text-3xl ${net >= 0 ? "text-success" : "text-accent"}`}>
+                      ${Math.abs(net).toFixed(0)}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="bg-primary text-primary-foreground py-20">
+        <div className="container mx-auto max-w-2xl px-4 text-center">
+          <Heart className="h-8 w-8 text-accent mx-auto mb-4 fill-accent" />
+          <h2 className="font-serif text-4xl md:text-5xl">Come carry something with us.</h2>
+          <p className="text-lg opacity-80 mt-4">
+            New members are welcomed by an existing member. Apply, and someone will reach out within a few days.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
+            <Link to="/signup"><Button size="lg" variant="secondary" className="rounded-full px-8">Join the Club</Button></Link>
+            <Link to="/about"><Button size="lg" variant="outline" className="rounded-full px-8 border-primary-foreground/30 bg-transparent text-primary-foreground hover:bg-primary-foreground/10">About us</Button></Link>
+          </div>
+          <p className="font-serif italic text-sm opacity-70 mt-8">
+            "The currency is friendship." — what a member said at our last potluck.
           </p>
         </div>
       </section>
-
-      {/* Curved transition into math */}
-      <div className="relative">
-        <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full block -mb-1">
-          <path d="M0 0V40C360 10 720 0 1080 15C1260 23 1350 35 1440 45V0H0Z" fill="hsl(var(--background))" />
-          <path d="M0 60C240 30 480 15 720 25C960 35 1200 50 1440 30V60H0Z" fill="hsl(var(--secondary))" fillOpacity="0.5" />
-        </svg>
-      </div>
-
-      {/* The Math — vivid colored panels, full width feel */}
-      <section className="py-16 md:py-20 px-4 bg-secondary/30">
-        <div className="container mx-auto max-w-6xl">
-          <div className="md:flex md:items-end md:justify-between mb-12 gap-4">
-            <div>
-              <h2 className="text-3xl md:text-5xl font-bold font-display mb-2">
-                OK, what does this <span className="text-accent">actually</span> look like?
-              </h2>
-              <p className="text-muted-foreground text-lg">
-                Real math. Real impact. Really not complicated.
-              </p>
-            </div>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            {/* Group average */}
-            <div className="bg-primary text-primary-foreground rounded-3xl p-8 relative overflow-hidden">
-              <div className="absolute top-4 right-4 w-20 h-20 rounded-full bg-primary-foreground/8 pointer-events-none" />
-              <div className="absolute bottom-6 right-10 w-12 h-12 rounded-full bg-primary-foreground/8 pointer-events-none" />
-              <p className="text-sm font-medium opacity-80 mb-1">GROUP AVERAGE</p>
-              <p className="text-5xl font-bold font-display">$2,800<span className="text-2xl opacity-70">/mo</span></p>
-              <p className="text-sm opacity-70 mt-1">≈ $33,600/year</p>
-              <div className="mt-6 pt-4 border-t border-primary-foreground/20">
-                <p className="text-3xl font-bold font-display">$196</p>
-                <p className="text-sm opacity-70">equal share each month</p>
-              </div>
-            </div>
-
-            {/* Sender */}
-            <div className="bg-accent text-accent-foreground rounded-3xl p-8 relative overflow-hidden">
-              <div className="absolute top-4 right-4 w-20 h-20 rounded-full bg-accent-foreground/8 pointer-events-none" />
-              <p className="text-sm font-medium opacity-80 mb-1">EARNING $4,000/MO</p>
-              <p className="text-xs opacity-60">($48,000/year)</p>
-              <p className="text-sm opacity-80 mt-3">Puts in <span className="font-bold text-lg">$280</span> (7%)</p>
-              <p className="text-sm opacity-80">Gets back <span className="font-bold text-lg">$196</span></p>
-              <div className="mt-6 bg-accent-foreground/15 rounded-2xl px-5 py-4">
-                <p className="font-bold font-display text-2xl">Sends $84</p>
-                <p className="text-sm opacity-80 mt-1">Won't even notice it's gone 🤷</p>
-              </div>
-            </div>
-
-            {/* Receiver */}
-            <div className="bg-fresh text-fresh-foreground rounded-3xl p-8 relative overflow-hidden">
-              <div className="absolute top-4 right-4 w-20 h-20 rounded-full bg-fresh-foreground/8 pointer-events-none" />
-              <p className="text-sm font-medium opacity-80 mb-1">EARNING $1,500/MO</p>
-              <p className="text-xs opacity-60">($18,000/year)</p>
-              <p className="text-sm opacity-80 mt-3">Puts in <span className="font-bold text-lg">$105</span> (7%)</p>
-              <p className="text-sm opacity-80">Gets back <span className="font-bold text-lg">$196</span></p>
-              <div className="mt-6 bg-fresh-foreground/15 rounded-2xl px-5 py-4">
-                <p className="font-bold font-display text-2xl">Gets $91</p>
-                <p className="text-sm opacity-80 mt-1">Groceries. A bill. A deep breath. 💛</p>
-              </div>
-            </div>
-          </div>
-          {/* Interactive Calculator */}
-          <div className="mt-12 bg-card rounded-3xl border-2 border-border/50 p-8 md:p-10">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center">
-                <Calculator className="h-6 w-6 text-primary-foreground" />
-              </div>
-              <div>
-                <h3 className="text-xl font-bold font-display">Try it yourself</h3>
-                <p className="text-sm text-muted-foreground">Plug in your numbers and see what happens</p>
-              </div>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-6 mb-6">
-              <div>
-                <label className="text-sm font-medium text-muted-foreground mb-1 block">Your monthly post-tax income</label>
-                {myIncomeNum > 0 && (
-                  <p className="text-xs text-muted-foreground mb-2">= ${(myIncomeNum * 12).toLocaleString()}/year</p>
-                )}
-                {!myIncomeNum && <p className="text-xs text-muted-foreground mb-2 opacity-0">placeholder</p>}
-                <div className="relative">
-                  <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    type="number"
-                    placeholder="e.g. 3000"
-                    value={myIncome}
-                    onChange={(e) => setMyIncome(e.target.value)}
-                    className="pl-9 text-lg h-12 rounded-xl"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground mb-1 block">Group average monthly income</label>
-                <p className="text-xs text-muted-foreground mb-2">= ${(groupAvgNum * 12).toLocaleString()}/year</p>
-                <div className="relative">
-                  <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    type="number"
-                    placeholder="2800"
-                    value={groupAvg}
-                    onChange={(e) => setGroupAvg(e.target.value)}
-                    className="pl-9 text-lg h-12 rounded-xl"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {hasResult && (
-              <div className="grid md:grid-cols-3 gap-4 animate-fade-in">
-                <div className="bg-secondary rounded-2xl p-5 text-center">
-                  <p className="text-xs text-muted-foreground font-medium mb-1">YOUR 7% CONTRIBUTION</p>
-                  <p className="text-3xl font-bold font-display text-primary">${myContribution.toFixed(2)}</p>
-                </div>
-                <div className="bg-secondary rounded-2xl p-5 text-center">
-                  <p className="text-xs text-muted-foreground font-medium mb-1">YOUR EQUAL SHARE</p>
-                  <p className="text-3xl font-bold font-display">${equalShare.toFixed(2)}</p>
-                </div>
-                <div className={`rounded-2xl p-5 text-center ${net > 0 ? "bg-fresh/15" : net < 0 ? "bg-accent/15" : "bg-secondary"}`}>
-                  <p className="text-xs text-muted-foreground font-medium mb-1">
-                    {net > 0 ? "YOU RECEIVE" : net < 0 ? "YOU SEND" : "BREAK EVEN"}
-                  </p>
-                  <p className={`text-3xl font-bold font-display ${net > 0 ? "text-fresh" : net < 0 ? "text-accent" : ""}`}>
-                    ${Math.abs(net).toFixed(2)}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {net > 0
-                      ? "per month from your neighbors 💛"
-                      : net < 0
-                      ? "per month to your neighbors 🤝"
-                      : "you're right at the average!"}
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* Quote / Values — warm flowing section */}
-      <div className="relative">
-        <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full block -mb-1">
-          <path d="M0 60V20C360 50 720 60 1080 45C1260 37 1350 25 1440 15V60H0Z" fill="hsl(var(--pop))" />
-        </svg>
-      </div>
-      <section className="bg-pop text-pop-foreground py-16 px-4">
-        <div className="container mx-auto max-w-5xl flex flex-col md:flex-row items-center gap-10">
-          <div className="w-20 h-20 md:w-28 md:h-28 bg-pop-foreground/10 rounded-full flex items-center justify-center flex-shrink-0">
-            <HandHeart className="h-10 w-10 md:h-14 md:w-14 opacity-80" />
-          </div>
-          <div>
-            <blockquote className="text-2xl md:text-3xl font-bold font-display leading-snug mb-4">
-              "I want to live in a society where the currency of exchange is gratitude and the infinitely renewable resource of kindness, which multiplies every time it is shared rather than depreciating with use."
-            </blockquote>
-            <p className="text-lg opacity-80">
-              — Robin Wall Kimmerer, <em>The Serviceberry</em>
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Curved transition to CTA */}
-      <div className="relative">
-        <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full block -mb-1">
-          <path d="M0 0C240 30 480 50 720 40C960 30 1200 10 1440 25V0H0Z" fill="hsl(var(--pop))" />
-          <path d="M0 60V30C360 55 720 60 1080 50C1260 45 1350 38 1440 35V60H0Z" fill="hsl(var(--primary))" />
-        </svg>
-      </div>
-
-      {/* CTA */}
-      <section className="relative py-24 px-4 bg-primary text-primary-foreground overflow-hidden">
-        <div className="absolute inset-0 pattern-dots opacity-[0.06] pointer-events-none" />
-        <div className="absolute top-10 right-[10%] w-20 h-20 rounded-full bg-accent/25 pointer-events-none" />
-        <div className="absolute bottom-12 left-[8%] w-14 h-14 rounded-full bg-pop/25 pointer-events-none" />
-
-        <div className="container mx-auto max-w-4xl relative z-10 flex flex-col md:flex-row items-center gap-12">
-          <div className="flex-1">
-            <h2 className="text-4xl md:text-5xl font-bold font-display mb-6 leading-tight">
-              Let's actually practice{" "}
-              <span className="text-accent">caring for one another.</span>
-            </h2>
-            <p className="text-lg text-primary-foreground/80 mb-8">
-              Started April 2025 with 20 people. Now 50+ and growing to 150.
-              Every person who joins makes this community stronger.
-            </p>
-            <Link to="/signup">
-              <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground text-xl px-14 py-7 rounded-full font-display font-bold shadow-2xl hover-wiggle">
-                Yeah, I'm in ✌️
-              </Button>
-            </Link>
-          </div>
-
-          {/* Mini stats */}
-          <div className="flex flex-row md:flex-col gap-4">
-            <div className="bg-primary-foreground/10 rounded-2xl p-5 text-center min-w-[120px]">
-              <p className="text-3xl font-bold font-display">20</p>
-              <p className="text-xs opacity-70">pilot members</p>
-            </div>
-            <div className="bg-primary-foreground/10 rounded-2xl p-5 text-center min-w-[120px]">
-              <p className="text-3xl font-bold font-display">50+</p>
-              <p className="text-xs opacity-70">and growing</p>
-            </div>
-            <div className="bg-accent/25 rounded-2xl p-5 text-center min-w-[120px]">
-              <p className="text-3xl font-bold font-display">150</p>
-              <p className="text-xs opacity-70">goal this year</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Color band */}
-      <div className="flex h-2">
-        <div className="flex-1 bg-primary" />
-        <div className="flex-1 bg-accent" />
-        <div className="flex-1 bg-pop" />
-        <div className="flex-1 bg-fresh" />
-        <div className="flex-1 bg-warm" />
-      </div>
     </div>
   );
 };
