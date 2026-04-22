@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart3, Users, Calculator, Mail } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import AdminKPIDashboard from "@/components/admin/AdminKPIDashboard";
 import AdminMembersTab from "@/components/admin/AdminMembersTab";
 import AdminMathView from "@/components/admin/AdminMathView";
@@ -54,8 +55,26 @@ const AdminDashboard = () => {
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
 
+      <Card className="mb-6 border-primary/20 bg-primary/5">
+        <CardContent className="flex flex-col gap-2 py-5 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="text-sm font-medium">Demo steward controls</p>
+            <p className="text-sm text-muted-foreground">
+              KPIs and member management are live, the monthly math creates real assignments, and the email tab is a safe template editor/preview for demos.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+            <span>{profiles.length} members</span>
+            <span>•</span>
+            <span>{runs.length} runs</span>
+            <span>•</span>
+            <span>{transactions.length} transactions</span>
+          </div>
+        </CardContent>
+      </Card>
+
       <Tabs defaultValue="kpi" className="space-y-6">
-        <TabsList className="grid grid-cols-4 w-full max-w-lg">
+        <TabsList className="grid h-auto w-full max-w-2xl grid-cols-2 gap-2 rounded-lg bg-transparent p-0 md:grid-cols-4">
           <TabsTrigger value="kpi" className="gap-1.5">
             <BarChart3 className="h-4 w-4" />
             <span className="hidden sm:inline">KPIs</span>

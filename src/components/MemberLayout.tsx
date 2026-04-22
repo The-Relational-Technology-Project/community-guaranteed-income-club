@@ -25,6 +25,9 @@ const MemberLayout = ({ children }: { children: React.ReactNode }) => {
     { to: "/events", label: "Events", icon: Calendar },
     { to: "/board", label: "Board", icon: MessageSquare },
   ];
+  const mobileLinks = isAdmin
+    ? [...links, { to: "/admin", label: "Admin", icon: ShieldCheck }]
+    : links;
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -114,7 +117,7 @@ const MemberLayout = ({ children }: { children: React.ReactNode }) => {
 
       {/* Mobile bottom nav */}
       <nav className="md:hidden fixed bottom-0 inset-x-0 bg-card border-t border-border flex justify-around py-2 z-40">
-        {links.map((l) => (
+        {mobileLinks.map((l) => (
           <Link key={l.to} to={l.to} className="flex-1">
             <div
               className={`flex flex-col items-center gap-0.5 py-1 text-[11px] ${
