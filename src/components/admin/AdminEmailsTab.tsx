@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
-import { Mail, Save, Eye, Edit2, ChevronDown, ChevronUp } from "lucide-react";
+import { Mail, Save, Eye, Edit2, ChevronDown, ChevronUp, Sparkles, Send } from "lucide-react";
 
 interface EmailTemplate {
   id: string;
@@ -95,6 +95,24 @@ const AdminEmailsTab = () => {
       .replace(/\{\{\/if\}\}/g, "")
       .replace(/\{\{#if isReceiver\}\}.*?\{\{\/if\}\}/gs, "");
 
+  const duplicateTemplate = async (template: EmailTemplate) => {
+    const { error } = await supabase
+      .from("email_templates")
+      .update({ updated_at: new Date().toISOString() })
+      .eq("id", template.id);
+
+    if (error) {
+      toast({ title: "Preview refresh failed", description: error.message, variant: "destructive" });
+      return;
+    }
+
+    toast({
+      title: "Template ready for demo",
+      description: "This template is editable and previewable, but live sending is not wired up yet.",
+    });
+    fetchTemplates();
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -112,10 +130,27 @@ const AdminEmailsTab = () => {
             Automated Email Flows
           </CardTitle>
           <CardDescription>
-            Toggle email flows on/off and edit the templates. When enabled, these emails will be sent automatically at the right time. 
+            Toggle email flows on/off and edit the templates for the demo steward handoff. 
             Use {"{{name}}"}, {"{{amount}}"}, {"{{otherName}}"}, {"{{venmoLink}}"} as placeholders.
           </CardDescription>
         </CardHeader>
+        <CardContent className="pt-0">
+          <div className="grid gap-3 md:grid-cols-[1fr_auto] md:items-center rounded-md border border-border/60 bg-card p-4">
+            <div className="space-y-1">
+              <p className="text-sm font-medium flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-accent" />
+                Demo status
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Templates, toggles, editing, and previews work. Actual sending automation is not connected yet, so this tab is demo-safe.
+              </p>
+            </div>
+            <Button variant="outline" className="gap-2" onClick={fetchTemplates}>
+              <Send className="h-4 w-4" />
+              Refresh templates
+            </Button>
+          </div>
+        </CardContent>
       </Card>
 
       {templates.map((template) => {
@@ -200,6 +235,15 @@ const AdminEmailsTab = () => {
                       <Eye className="h-3 w-3" />
                       {isPreviewing ? "Hide Preview" : "Preview"}
                       {isPreviewing ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => duplicateTemplate(template)}
+                      className="gap-1"
+                    >
+                      <Sparkles className="h-3 w-3" />
+                      Mark demo-ready
                     </Button>
                   </div>
 
