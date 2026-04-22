@@ -37,6 +37,17 @@ const Login = () => {
     }
   };
 
+  const demoAsSteward = async () => {
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({ email: "admin@test.com", password: "test1234" });
+    setLoading(false);
+    if (error) {
+      toast({ title: "Steward login failed", description: error.message, variant: "destructive" });
+    } else {
+      navigate("/admin");
+    }
+  };
+
   return (
     <div className="flex items-center justify-center min-h-[70vh] px-4">
       <Card className="w-full max-w-md">
@@ -70,15 +81,26 @@ const Login = () => {
               {loading ? "Signing in..." : "Sign In"}
             </Button>
           </form>
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full mt-3 rounded-full border-accent/40"
-            onClick={demoAsMaya}
-            disabled={loading}
-          >
-            ✨ Demo as Maya
-          </Button>
+          <div className="mt-3 grid gap-2 sm:grid-cols-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-full border-accent/40"
+              onClick={demoAsMaya}
+              disabled={loading}
+            >
+              ✨ Demo as Maya
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-full border-primary/30"
+              onClick={demoAsSteward}
+              disabled={loading}
+            >
+              Shield Demo as Steward
+            </Button>
+          </div>
           <p className="mt-4 text-center text-sm text-muted-foreground">
             Don't have an account?{" "}
             <Link to="/signup" className="text-primary hover:underline">
