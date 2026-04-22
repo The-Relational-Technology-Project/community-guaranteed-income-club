@@ -34,6 +34,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  const hydrateUserState = async (nextUser: User | null) => {
+    if (!nextUser) {
+      setProfile(null);
+      setIsAdmin(false);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+
+    const [{ data: profileData }, { data: roleData }] = await Promise.all([
+      supabase.from("profiles").select("*").eq("id", nextUser.id).single(),
+      supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", nextUser.id)
+        .eq("role", "admin")
+        .maybeSingle(),
+    ]);
+
+    setProfile(profileData);
+    setIsAdmin(!!roleData);
+    setLoading(false);
+  };
+
   const fetchProfile = async (userId: string) => {
     const { data } = await supabase
       .from("profiles")
@@ -65,30 +90,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setSession(session);
         setUser(session?.user ?? null);
 
-        if (session?.user) {
-          setTimeout(async () => {
-            await fetchProfile(session.user.id);
-            await checkAdmin(session.user.id);
-            setLoading(false);
-          }, 0);
-        } else {
-          setProfile(null);
-          setIsAdmin(false);
-          setLoading(false);
-        }
+        setTimeout(() => {
+          hydrateUserState(session?.user ?? null);
+        }, 0);
       }
     );
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchProfile(session.user.id).then(() =>
-          checkAdmin(session.user.id).then(() => setLoading(false))
-        );
-      } else {
-        setLoading(false);
-      }
+      hydrateUserState(session?.user ?? null);
     });
 
     return () => subscription.unsubscribe();
