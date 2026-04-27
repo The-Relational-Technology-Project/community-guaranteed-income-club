@@ -121,6 +121,8 @@ export type Database = {
       profiles: {
         Row: {
           bio: string | null
+          contact_method: string
+          contact_notes: string | null
           created_at: string
           email: string
           employment_status:
@@ -128,6 +130,7 @@ export type Database = {
             | null
           favorite_third_space: string | null
           id: string
+          is_steward_managed: boolean
           is_verified: boolean | null
           name: string
           open_to_in_person: boolean | null
@@ -146,6 +149,8 @@ export type Database = {
         }
         Insert: {
           bio?: string | null
+          contact_method?: string
+          contact_notes?: string | null
           created_at?: string
           email: string
           employment_status?:
@@ -153,6 +158,7 @@ export type Database = {
             | null
           favorite_third_space?: string | null
           id: string
+          is_steward_managed?: boolean
           is_verified?: boolean | null
           name: string
           open_to_in_person?: boolean | null
@@ -171,6 +177,8 @@ export type Database = {
         }
         Update: {
           bio?: string | null
+          contact_method?: string
+          contact_notes?: string | null
           created_at?: string
           email?: string
           employment_status?:
@@ -178,6 +186,7 @@ export type Database = {
             | null
           favorite_third_space?: string | null
           id?: string
+          is_steward_managed?: boolean
           is_verified?: boolean | null
           name?: string
           open_to_in_person?: boolean | null
