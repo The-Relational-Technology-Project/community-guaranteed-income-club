@@ -13,6 +13,30 @@ const Signup = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1);
+  const [mode, setMode] = useState<"magic" | "password">("magic");
+  const [magicEmail, setMagicEmail] = useState("");
+  const [magicName, setMagicName] = useState("");
+  const [magicLoading, setMagicLoading] = useState(false);
+  const [magicSent, setMagicSent] = useState(false);
+
+  const handleMagicSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setMagicLoading(true);
+    const { error } = await supabase.auth.signInWithOtp({
+      email: magicEmail,
+      options: {
+        emailRedirectTo: `${window.location.origin}/profile`,
+        shouldCreateUser: true,
+        data: { name: magicName },
+      },
+    });
+    setMagicLoading(false);
+    if (error) {
+      toast({ title: "Couldn't send link", description: error.message, variant: "destructive" });
+    } else {
+      setMagicSent(true);
+    }
+  };
 
   const [form, setForm] = useState({
     email: "",
@@ -86,16 +110,61 @@ const Signup = () => {
     <div className="flex items-center justify-center min-h-[70vh] px-4 py-8">
       <Card className="w-full max-w-lg">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Join the Program</CardTitle>
+          <CardTitle className="text-2xl font-serif">Join the Club</CardTitle>
           <CardDescription>
-            {step === 1 ? "Create your account" : "Tell us about yourself"}
+            {mode === "magic"
+              ? "We'll email you a one-time sign-in link to get started"
+              : step === 1 ? "Create your account" : "Tell us about yourself"}
           </CardDescription>
-          <div className="flex gap-2 justify-center mt-2">
-            <div className={`h-1 w-16 rounded-full ${step >= 1 ? "bg-primary" : "bg-muted"}`} />
-            <div className={`h-1 w-16 rounded-full ${step >= 2 ? "bg-primary" : "bg-muted"}`} />
-          </div>
+          {mode === "password" && (
+            <div className="flex gap-2 justify-center mt-2">
+              <div className={`h-1 w-16 rounded-full ${step >= 1 ? "bg-primary" : "bg-muted"}`} />
+              <div className={`h-1 w-16 rounded-full ${step >= 2 ? "bg-primary" : "bg-muted"}`} />
+            </div>
+          )}
         </CardHeader>
         <CardContent>
+          {mode === "magic" ? (
+            magicSent ? (
+              <div className="text-center space-y-3 py-4">
+                <p className="text-base">📬 Sign-in link sent to <strong>{magicEmail}</strong></p>
+                <p className="text-sm text-muted-foreground">
+                  Click the link in your inbox to finish setting up your profile. It's good for one hour.
+                </p>
+              </div>
+            ) : (
+              <form onSubmit={handleMagicSignup} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="magic-name">Your name</Label>
+                  <Input id="magic-name" value={magicName} onChange={(e) => setMagicName(e.target.value)} required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="magic-email">Email</Label>
+                  <Input
+                    id="magic-email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={magicEmail}
+                    onChange={(e) => setMagicEmail(e.target.value)}
+                    required
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    We'll email you a one-time link. After you sign in you'll finish your profile (income, ZIP, Venmo).
+                  </p>
+                </div>
+                <Button type="submit" className="w-full rounded-full" disabled={magicLoading}>
+                  {magicLoading ? "Sending..." : "Send me a sign-in link"}
+                </Button>
+                <button
+                  type="button"
+                  className="block mx-auto text-xs text-muted-foreground hover:text-foreground underline"
+                  onClick={() => setMode("password")}
+                >
+                  Prefer a password? Sign up the long way →
+                </button>
+              </form>
+            )
+          ) : (
           <form onSubmit={handleSignup} className="space-y-4">
             {step === 1 ? (
               <>
@@ -185,6 +254,16 @@ const Signup = () => {
               </>
             )}
           </form>
+          )}
+          {mode === "password" && (
+            <button
+              type="button"
+              className="mt-3 block mx-auto text-xs text-muted-foreground hover:text-foreground underline"
+              onClick={() => { setMode("magic"); setStep(1); }}
+            >
+              ← Back to magic-link signup
+            </button>
+          )}
           <p className="mt-4 text-center text-sm text-muted-foreground">
             Already have an account?{" "}
             <Link to="/login" className="text-primary hover:underline">Sign in</Link>

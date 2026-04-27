@@ -1,63 +1,102 @@
+# From Demo → Functional App: Clean Slate + Magic Link Auth
 
-## Demo the payment UX by generating a fresh monthly assignment
+This pass turns the platform from a steward demo into a real app for ~150 members, while preserving a one-click demo experience behind a footer link.
 
-Because this mode is read-only, the next step is to switch to implementation mode and perform the demo run in the app. The current code already supports the full flow once a run is created.
+---
 
-### What I will do
-1. Log in as an admin/steward account.
-2. Open **Admin → Math**.
-3. Click **Run Now** / **Confirm & Run** to generate this month’s `calculation_runs` entry and `transactions`.
-4. Log in as a member demo account (Maya or another sender) and open:
-   - **/home** to see the new “Your connection this month” card
-   - **/transactions** to see the full send/receive card UI
-5. Verify the payment journey end-to-end:
-   - recipient photo/name appears
-   - amount appears
-   - favorite third space appears if present
-   - Venmo button opens the connection prompt dialog
-   - “I’ve sent this” / confirmation control works
-   - in-person handoff toggle works
+## 1. Strip dummy data, keep Maya as the demo persona
 
-### What the current UX should show
-Based on the existing code:
-- **Admin trigger location:** `src/components/admin/AdminMathView.tsx`
-  - primary CTA: **Run Now** / **Run Again**
-  - confirmation modal: **Confirm & Run**
-- **Member payment experience:** `src/pages/MemberHome.tsx`
-  - monthly assignment card
-  - optional Venmo link with human note
-  - sender confirmation button
-- **Detailed transaction experience:** `src/pages/Transactions.tsx`
-  - all transactions list
-  - Venmo prompt dialog
-  - in-person meetup opt-in
-  - confirmation checkbox
+**Keep**
+- `maya@test.com` profile (the linked demo experience)
+- `admin@test.com` profile (real steward account — kept so you can log in as steward)
+- `email_templates` rows (real config)
+- Storage buckets, schema, RLS, triggers, functions
 
-### Likely outcomes
-- If there are already active participants with income data, the run should immediately create demo transactions.
-- If the selected member is a **receiver** this month, they will not see a Venmo send CTA on Home; in that case I’ll switch to a member who is a **sender** so you can see the payment UX specifically.
-- If a run already exists for this month, the admin view warns that running again creates duplicates, so I’ll first verify whether using the newest run is enough for the demo or whether a clean demo path is needed.
+**Delete (via insert-tool DELETE statements)**
+- All `transactions` rows
+- All `calculation_runs` rows
+- All `profile_history` rows
+- All `waitlist` rows
+- All `profiles` rows EXCEPT Maya and Admin
+- The corresponding `auth.users` rows for the deleted profiles (Alex, Jordan, Taylor, Sam, Dana, Casey) so emails free up
+- All `user_roles` rows for deleted users (admin role for `admin@test.com` is preserved)
 
-### If anything blocks the demo
-I’ll check these in order:
-1. Member statuses are `active`
-2. At least 2 active members exist
-3. Income values are present
-4. Transactions were inserted for the latest run
-5. The chosen demo member is a sender, not only a receiver
+**Re-seed for the demo persona only**
+- A single `calculation_runs` row dated this month
+- 2 `transactions` rows for Maya: one she sends (to admin), one she receives (from admin) — so `/home`, `/transactions`, `/card` all show populated state when entering as the demo user
 
-### Optional cleanup after the demo
-If you want a cleaner steward handoff, after validating the UX I can make a follow-up improvement pass to:
-- add a dedicated **“Preview payment experience as sender”** admin shortcut
-- prevent accidental duplicate monthly runs
-- surface the newest assignment more clearly on the member home page
+**Mock data files** (`src/data/mockMember.ts`) — keep as-is. Events and Board are still mock by design (called out in earlier handoff doc); they render the same whether you're the demo user or a real new member. Real persistence is a separate follow-up.
 
-### Files already supporting this flow
-- `src/components/admin/AdminMathView.tsx`
-- `src/pages/MemberHome.tsx`
-- `src/pages/Transactions.tsx`
-- `src/pages/admin/AdminDashboard.tsx`
-- `src/contexts/AuthContext.tsx`
+---
 
-### Deliverable after approval
-I’ll run the demo calculation, verify the sender-side payment UI, and report back exactly what the member sees step by step.
+## 2. Magic link auth
+
+Add **passwordless email login** alongside existing email/password.
+
+**Login page (`src/pages/Login.tsx`)**
+- New tabbed UI: "Magic Link" (default) and "Password"
+- Magic link tab: single email field + "Send me a sign-in link" button → `supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.origin + '/home', shouldCreateUser: false } })`
+- Toast on success: "Check your email for a sign-in link"
+- Password tab: existing email/password form (kept for the steward and as fallback)
+- Remove the two big "Demo as Maya / Demo as Steward" buttons from this page (the demo entry point moves to the footer — see §3)
+
+**Signup page (`src/pages/Signup.tsx`)**
+- Add a prominent option at the top: "Sign up with a magic link instead" → expands a single-field magic-link signup using `signInWithOtp` with `shouldCreateUser: true` and the new-user metadata (name only at this stage). For the rich profile fields (income, ZIP, Venmo, etc.), redirect to `/profile` after first sign-in with a one-time "Finish your profile" banner so members aren't blocked at the door.
+- Keep the existing 2-step email/password signup as the alternate path.
+
+**`/auth/callback` handling**
+- Supabase magic links land at `emailRedirectTo` (`/home`) with the session already established by the SDK on `onAuthStateChange`. No new route needed — `AuthContext` already handles this.
+
+**Email templates**
+- Magic link emails currently use Lovable's default templates. **No template scaffolding in this pass** — defaults work and ship the magic link immediately. We can brand them later (separate ask).
+- Confirm in Cloud → Auth that "Enable email confirmations" stays on and "Enable magic link" is on. (No tool change needed if defaults; flagging so the steward verifies.)
+
+---
+
+## 3. "Try the demo" footer link
+
+In `src/components/Layout.tsx` footer:
+- Add a small link: **"Try a live demo →"** that navigates to a new `/demo` route.
+- New page `src/pages/Demo.tsx`: brief explainer ("Sign in as Maya to see what a member sees") + one button that runs the existing `signInWithPassword({ email: 'maya@test.com', password: 'test1234' })` and routes to `/home`. Also a smaller "Sign in as the steward" button for admin demo.
+- This is the ONLY remaining entry point for hardcoded demo credentials. Keeps the rest of the app feeling like a clean product.
+
+---
+
+## 4. Files touched
+
+**Edited**
+- `src/pages/Login.tsx` — tabbed magic link / password, remove demo buttons
+- `src/pages/Signup.tsx` — add magic-link option at top
+- `src/components/Layout.tsx` — footer "Try a live demo" link
+- `src/App.tsx` — register `/demo` route (public)
+
+**Created**
+- `src/pages/Demo.tsx` — one-click demo entry for Maya / Steward
+
+**Database (insert-tool, not migrations — data only)**
+- DELETE transactions, calculation_runs, profile_history, waitlist
+- DELETE profiles + auth.users + user_roles for the 6 non-demo seed accounts
+- INSERT 1 calculation_run + 2 transactions for Maya so the demo lands on populated screens
+
+**No schema changes.** No new tables, no new RLS, no migrations.
+
+---
+
+## 5. Out of scope (call out for next pass)
+
+- Branded magic link email template (defer — defaults work; brand later via auth email scaffolding)
+- Real persistence for Events / Board / Ways to show up
+- Password reset flow (`/reset-password`) — **strongly recommend as the very next pass** before onboarding 150 real members
+- Wiring up actual transactional email send on monthly run
+- Removing the steward backdoor on `/demo` once you have real admin credentials in production
+
+---
+
+## 6. After-the-fact verification checklist
+
+- `/` clean — no member photos pre-loaded except Maya in the demo flow
+- Footer shows "Try a live demo" link
+- `/demo` lands you in as Maya in one click; `/home` and `/transactions` show real data
+- `/login` magic link tab sends a real email; clicking the link logs you in to `/home`
+- `/signup` magic link path creates an `auth.users` + `profiles` row, redirects to `/profile` with a "finish your profile" hint
+- Existing `admin@test.com` / `test1234` password login still works and reaches `/admin`

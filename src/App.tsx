@@ -19,6 +19,7 @@ import MemberHome from "@/pages/MemberHome";
 import MemberCard from "@/pages/MemberCard";
 import Events from "@/pages/Events";
 import Board from "@/pages/Board";
+import Demo from "@/pages/Demo";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +36,7 @@ const App = () => (
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
               <Route path="/about" element={<About />} />
+              <Route path="/demo" element={<Demo />} />
               <Route path="/home" element={<ProtectedRoute><MemberHome /></ProtectedRoute>} />
               <Route path="/card" element={<ProtectedRoute><MemberCard /></ProtectedRoute>} />
               <Route path="/events" element={<ProtectedRoute><Events /></ProtectedRoute>} />
