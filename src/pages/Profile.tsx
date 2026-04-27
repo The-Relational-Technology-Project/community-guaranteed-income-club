@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Camera } from "lucide-react";
+import TransactionHistory from "@/components/profile/TransactionHistory";
 
 const Profile = () => {
   const { profile, refreshProfile, user } = useAuth();
@@ -236,6 +237,7 @@ const Profile = () => {
           </form>
         </CardContent>
       </Card>
+      {user && <TransactionHistory userId={user.id} />}
     </div>
   );
 };
