@@ -21,7 +21,7 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Play, ChevronDown, ChevronRight, UserPlus } from "lucide-react";
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Tables } from "@/integrations/supabase/types";
 import MemberTransactionPanel from "./MemberTransactionPanel";
@@ -206,9 +206,8 @@ const AdminMembersTab = ({ profiles, runs, onRefresh }: AdminMembersTabProps) =>
                 const isOpen = expanded === p.id;
                 const managed = (p as any).is_steward_managed;
                 return (
-                  <>
+                  <Fragment key={p.id}>
                 <TableRow
-                  key={p.id}
                   className="cursor-pointer"
                   onClick={() => setExpanded(isOpen ? null : p.id)}
                 >
@@ -248,7 +247,7 @@ const AdminMembersTab = ({ profiles, runs, onRefresh }: AdminMembersTabProps) =>
                   </TableCell>
                 </TableRow>
                 {isOpen && (
-                  <TableRow key={p.id + "-x"} className="bg-muted/30">
+                  <TableRow className="bg-muted/30">
                     <TableCell colSpan={7}>
                       {managed && ((p as any).contact_method || (p as any).contact_notes) && (
                         <div className="mb-3 text-xs text-muted-foreground">
@@ -267,7 +266,7 @@ const AdminMembersTab = ({ profiles, runs, onRefresh }: AdminMembersTabProps) =>
                     </TableCell>
                   </TableRow>
                 )}
-                  </>
+                  </Fragment>
                 );
               })}
             </TableBody>
