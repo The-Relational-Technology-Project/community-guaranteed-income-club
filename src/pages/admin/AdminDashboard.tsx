@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BarChart3, Users, Calculator, Mail } from "lucide-react";
+import { BarChart3, Users, Calculator, Mail, ArrowLeftRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import AdminKPIDashboard from "@/components/admin/AdminKPIDashboard";
 import AdminMembersTab from "@/components/admin/AdminMembersTab";
 import AdminMathView from "@/components/admin/AdminMathView";
 import AdminEmailsTab from "@/components/admin/AdminEmailsTab";
+import AdminTransactionsTab from "@/components/admin/AdminTransactionsTab";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Profile = Tables<"profiles">;
@@ -74,7 +75,7 @@ const AdminDashboard = () => {
       </Card>
 
       <Tabs defaultValue="kpi" className="space-y-6">
-        <TabsList className="grid h-auto w-full max-w-2xl grid-cols-2 gap-2 rounded-lg bg-transparent p-0 md:grid-cols-4">
+        <TabsList className="grid h-auto w-full max-w-3xl grid-cols-3 gap-2 rounded-lg bg-transparent p-0 md:grid-cols-5">
           <TabsTrigger value="kpi" className="gap-1.5">
             <BarChart3 className="h-4 w-4" />
             <span className="hidden sm:inline">KPIs</span>
@@ -86,6 +87,10 @@ const AdminDashboard = () => {
           <TabsTrigger value="math" className="gap-1.5">
             <Calculator className="h-4 w-4" />
             <span className="hidden sm:inline">Math</span>
+          </TabsTrigger>
+          <TabsTrigger value="transactions" className="gap-1.5">
+            <ArrowLeftRight className="h-4 w-4" />
+            <span className="hidden sm:inline">Transactions</span>
           </TabsTrigger>
           <TabsTrigger value="emails" className="gap-1.5">
             <Mail className="h-4 w-4" />
@@ -103,6 +108,10 @@ const AdminDashboard = () => {
 
         <TabsContent value="math">
           <AdminMathView profiles={profiles} runs={runs} onRefresh={fetchData} />
+        </TabsContent>
+
+        <TabsContent value="transactions">
+          <AdminTransactionsTab profiles={profiles} runs={runs} />
         </TabsContent>
 
         <TabsContent value="emails">
