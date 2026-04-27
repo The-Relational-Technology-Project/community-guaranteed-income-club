@@ -20,10 +20,12 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Play } from "lucide-react";
-import { useState } from "react";
+import { Play, ChevronDown, ChevronRight, UserPlus } from "lucide-react";
+import { useMemo, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Tables } from "@/integrations/supabase/types";
+import MemberTransactionPanel from "./MemberTransactionPanel";
+import AddManagedMemberDialog from "./AddManagedMemberDialog";
 
 type Profile = Tables<"profiles">;
 type CalcRun = Tables<"calculation_runs">;
@@ -38,6 +40,11 @@ const AdminMembersTab = ({ profiles, runs, onRefresh }: AdminMembersTabProps) =>
   const { user } = useAuth();
   const [running, setRunning] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const [showAddManaged, setShowAddManaged] = useState(false);
+
+  const profileMap = useMemo(() => new Map(profiles.map((p) => [p.id, p])), [profiles]);
+  const runMap = useMemo(() => new Map(runs.map((r) => [r.id, r])), [runs]);
 
   const activeCount = profiles.filter((p) => p.participant_status === "active").length;
 
@@ -165,7 +172,11 @@ const AdminMembersTab = ({ profiles, runs, onRefresh }: AdminMembersTabProps) =>
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
+        <Button variant="outline" onClick={() => setShowAddManaged(true)} className="gap-2">
+          <UserPlus className="h-4 w-4" />
+          Add member without email
+        </Button>
         <Button onClick={() => setShowConfirm(true)} disabled={running} className="gap-2">
           <Play className="h-4 w-4" />
           {running ? "Running..." : "Run Monthly Calculation"}
@@ -181,6 +192,7 @@ const AdminMembersTab = ({ profiles, runs, onRefresh }: AdminMembersTabProps) =>
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-8" />
                 <TableHead>Name</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>ZIP</TableHead>
@@ -190,10 +202,28 @@ const AdminMembersTab = ({ profiles, runs, onRefresh }: AdminMembersTabProps) =>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {profiles.map((p) => (
-                <TableRow key={p.id}>
-                  <TableCell className="font-medium">{p.name}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{p.email}</TableCell>
+              {profiles.map((p) => {
+                const isOpen = expanded === p.id;
+                const managed = (p as any).is_steward_managed;
+                return (
+                  <>
+                <TableRow
+                  key={p.id}
+                  className="cursor-pointer"
+                  onClick={() => setExpanded(isOpen ? null : p.id)}
+                >
+                  <TableCell>
+                    {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  </TableCell>
+                  <TableCell className="font-medium">
+                    {p.name}
+                    {managed && (
+                      <Badge variant="outline" className="ml-2 text-[10px]">Steward-managed</Badge>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {managed ? <span className="italic">no email</span> : p.email}
+                  </TableCell>
                   <TableCell>{p.zip_code}</TableCell>
                   <TableCell>${Number(p.post_tax_monthly_income).toLocaleString()}</TableCell>
                   <TableCell>
@@ -201,7 +231,7 @@ const AdminMembersTab = ({ profiles, runs, onRefresh }: AdminMembersTabProps) =>
                       {p.is_verified ? "Yes" : "No"}
                     </Badge>
                   </TableCell>
-                  <TableCell>
+                  <TableCell onClick={(e) => e.stopPropagation()}>
                     <Select
                       value={p.participant_status ?? "inactive"}
                       onValueChange={(v) => updateStatus(p.id, v)}
@@ -217,7 +247,29 @@ const AdminMembersTab = ({ profiles, runs, onRefresh }: AdminMembersTabProps) =>
                     </Select>
                   </TableCell>
                 </TableRow>
-              ))}
+                {isOpen && (
+                  <TableRow key={p.id + "-x"} className="bg-muted/30">
+                    <TableCell colSpan={7}>
+                      {managed && ((p as any).contact_method || (p as any).contact_notes) && (
+                        <div className="mb-3 text-xs text-muted-foreground">
+                          <span className="font-medium">Contact:</span>{" "}
+                          {(p as any).contact_method ?? "—"}
+                          {(p as any).contact_notes && (
+                            <> · {(p as any).contact_notes}</>
+                          )}
+                        </div>
+                      )}
+                      <MemberTransactionPanel
+                        memberId={p.id}
+                        profileMap={profileMap}
+                        runMap={runMap}
+                      />
+                    </TableCell>
+                  </TableRow>
+                )}
+                  </>
+                );
+              })}
             </TableBody>
           </Table>
         </CardContent>
@@ -276,6 +328,12 @@ const AdminMembersTab = ({ profiles, runs, onRefresh }: AdminMembersTabProps) =>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AddManagedMemberDialog
+        open={showAddManaged}
+        onOpenChange={setShowAddManaged}
+        onCreated={onRefresh}
+      />
     </div>
   );
 };
