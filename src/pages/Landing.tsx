@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowRight, Heart, MessageCircle, Calendar, Check } from "lucide-react";
+import { ArrowRight, Heart, Calendar, Check } from "lucide-react";
 import { ClubMark } from "@/components/Wordmark";
 import { CHAPTER, ORG } from "@/lib/chapter";
 
@@ -50,7 +50,16 @@ const Landing = () => {
           </div>
 
           <h1 className="font-display font-bold text-5xl md:text-7xl lg:text-8xl leading-[0.95] text-pop-foreground max-w-4xl mx-auto text-center tracking-tight">
-            A guaranteed income, <span className="bg-primary text-primary-foreground px-3 py-1 inline-block rotate-[-1deg] rounded-md">guaranteed</span> by your community.
+            <span className="relative inline-block">
+              <span className="relative z-10 bg-primary text-primary-foreground px-3 py-1 inline-block rotate-[-1.5deg] rounded-md shadow-md">
+                Mutual support
+              </span>
+              <span
+                aria-hidden
+                className="absolute -bottom-2 left-1 right-1 h-3 bg-accent/70 rounded-full -z-0"
+              />
+            </span>{" "}
+            through income sharing.
           </h1>
 
           <p className="text-lg md:text-2xl text-pop-foreground/85 mt-8 max-w-2xl mx-auto leading-relaxed text-center font-medium">
@@ -64,9 +73,9 @@ const Landing = () => {
                 Join the Club <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
-            <Link to="/signup">
+            <Link to="/about">
               <Button size="lg" variant="outline" className="rounded-full text-base px-8 gap-2 h-14 font-bold bg-card border-2 border-foreground/10 hover:bg-card/80">
-                <MessageCircle className="h-4 w-4" /> Chat with a member
+                How it works
               </Button>
             </Link>
           </div>
