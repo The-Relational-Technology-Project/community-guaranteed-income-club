@@ -34,6 +34,13 @@ const Signup = () => {
     if (error) {
       toast({ title: "Couldn't send link", description: error.message, variant: "destructive" });
     } else {
+      // Notify Alex that someone new just signed up. Best-effort, never block UX.
+      supabase.functions.invoke("send-email", {
+        body: {
+          kind: "new_signup_admin",
+          newMember: { name: magicName, email: magicEmail },
+        },
+      }).catch(() => {});
       setMagicSent(true);
     }
   };
@@ -103,6 +110,18 @@ const Signup = () => {
       title: "Welcome to the program!",
       description: "Please check your email to confirm your account.",
     });
+    // Best-effort admin ping
+    supabase.functions.invoke("send-email", {
+      body: {
+        kind: "new_signup_admin",
+        newMember: {
+          name: form.name,
+          email: form.email,
+          zip_code: form.zip_code,
+          profession: form.profession,
+        },
+      },
+    }).catch(() => {});
     navigate("/roster");
   };
 

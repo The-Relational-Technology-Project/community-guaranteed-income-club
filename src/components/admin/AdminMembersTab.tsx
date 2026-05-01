@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Play, ChevronDown, ChevronRight, UserPlus } from "lucide-react";
+import { Play, ChevronDown, ChevronRight, UserPlus, Mail } from "lucide-react";
 import { Fragment, useMemo, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Tables } from "@/integrations/supabase/types";
@@ -42,6 +42,7 @@ const AdminMembersTab = ({ profiles, runs, onRefresh }: AdminMembersTabProps) =>
   const [showConfirm, setShowConfirm] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [showAddManaged, setShowAddManaged] = useState(false);
+  const [sendingWelcome, setSendingWelcome] = useState<string | null>(null);
 
   const profileMap = useMemo(() => new Map(profiles.map((p) => [p.id, p])), [profiles]);
   const runMap = useMemo(() => new Map(runs.map((r) => [r.id, r])), [runs]);
@@ -59,6 +60,23 @@ const AdminMembersTab = ({ profiles, runs, onRefresh }: AdminMembersTabProps) =>
     } else {
       toast({ title: "Status updated" });
       onRefresh();
+    }
+  };
+
+  const sendWelcomeEmail = async (profileId: string, name: string) => {
+    setSendingWelcome(profileId);
+    const { data, error } = await supabase.functions.invoke("send-email", {
+      body: { kind: "welcome_approval", profileId },
+    });
+    setSendingWelcome(null);
+    if (error || !data?.ok) {
+      toast({
+        title: "Couldn't send welcome email",
+        description: (data as any)?.error ?? error?.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({ title: `Welcome email sent to ${name}` });
     }
   };
 
@@ -199,6 +217,7 @@ const AdminMembersTab = ({ profiles, runs, onRefresh }: AdminMembersTabProps) =>
                 <TableHead>Income</TableHead>
                 <TableHead>Verified</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead className="w-32">Welcome</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -245,10 +264,26 @@ const AdminMembersTab = ({ profiles, runs, onRefresh }: AdminMembersTabProps) =>
                       </SelectContent>
                     </Select>
                   </TableCell>
+                  <TableCell onClick={(e) => e.stopPropagation()}>
+                    {managed || !p.email ? (
+                      <span className="text-xs text-muted-foreground">—</span>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="gap-1.5 h-8"
+                        disabled={sendingWelcome === p.id}
+                        onClick={() => sendWelcomeEmail(p.id, p.name)}
+                      >
+                        <Mail className="h-3.5 w-3.5" />
+                        {sendingWelcome === p.id ? "Sending…" : "Send"}
+                      </Button>
+                    )}
+                  </TableCell>
                 </TableRow>
                 {isOpen && (
                   <TableRow className="bg-muted/30">
-                    <TableCell colSpan={7}>
+                    <TableCell colSpan={8}>
                       {managed && ((p as any).contact_method || (p as any).contact_notes) && (
                         <div className="mb-3 text-xs text-muted-foreground">
                           <span className="font-medium">Contact:</span>{" "}
