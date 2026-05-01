@@ -217,6 +217,7 @@ const AdminMembersTab = ({ profiles, runs, onRefresh }: AdminMembersTabProps) =>
                 <TableHead>Income</TableHead>
                 <TableHead>Verified</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead className="w-32">Welcome</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -263,10 +264,26 @@ const AdminMembersTab = ({ profiles, runs, onRefresh }: AdminMembersTabProps) =>
                       </SelectContent>
                     </Select>
                   </TableCell>
+                  <TableCell onClick={(e) => e.stopPropagation()}>
+                    {managed || !p.email ? (
+                      <span className="text-xs text-muted-foreground">—</span>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="gap-1.5 h-8"
+                        disabled={sendingWelcome === p.id}
+                        onClick={() => sendWelcomeEmail(p.id, p.name)}
+                      >
+                        <Mail className="h-3.5 w-3.5" />
+                        {sendingWelcome === p.id ? "Sending…" : "Send"}
+                      </Button>
+                    )}
+                  </TableCell>
                 </TableRow>
                 {isOpen && (
                   <TableRow className="bg-muted/30">
-                    <TableCell colSpan={7}>
+                    <TableCell colSpan={8}>
                       {managed && ((p as any).contact_method || (p as any).contact_notes) && (
                         <div className="mb-3 text-xs text-muted-foreground">
                           <span className="font-medium">Contact:</span>{" "}
