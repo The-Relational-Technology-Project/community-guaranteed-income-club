@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,108 +6,108 @@
 
 @layer base {
   :root {
-    /* Baltimore Mutualist Club — cream / forest / gold */
-    --background: 39 45% 93%;
-    --foreground: 155 36% 17%;
+    /* Community Guaranteed Income Club — Mamdani/Oatly inspired */
+    --background: 42 60% 96%;
+    --foreground: 220 25% 12%;
 
-    --card: 39 50% 97%;
-    --card-foreground: 155 36% 17%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 25% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 155 36% 17%;
+    --popover-foreground: 220 25% 12%;
 
-    --primary: 155 24% 23%;
-    --primary-foreground: 39 50% 96%;
+    --primary: 220 90% 56%;
+    --primary-foreground: 42 60% 98%;
 
-    --secondary: 39 35% 88%;
-    --secondary-foreground: 155 36% 17%;
+    --secondary: 42 55% 90%;
+    --secondary-foreground: 220 25% 12%;
 
-    --muted: 39 30% 90%;
-    --muted-foreground: 155 12% 38%;
+    --muted: 42 30% 92%;
+    --muted-foreground: 220 12% 38%;
 
-    --accent: 41 49% 56%;
-    --accent-foreground: 155 36% 17%;
+    --accent: 18 88% 58%;
+    --accent-foreground: 42 60% 98%;
 
-    --destructive: 0 70% 45%;
-    --destructive-foreground: 39 50% 96%;
+    --destructive: 0 75% 50%;
+    --destructive-foreground: 42 60% 98%;
 
-    --border: 39 25% 82%;
-    --input: 39 25% 82%;
-    --ring: 155 24% 23%;
+    --border: 220 15% 86%;
+    --input: 220 15% 86%;
+    --ring: 220 90% 56%;
 
     --radius: 0.75rem;
 
-    --pop: 41 49% 56%;
-    --pop-foreground: 155 36% 17%;
-    --warm: 18 55% 50%;
-    --warm-foreground: 39 50% 96%;
-    --fresh: 155 24% 23%;
-    --fresh-foreground: 39 50% 96%;
+    --pop: 48 96% 60%;
+    --pop-foreground: 220 25% 12%;
+    --warm: 18 88% 58%;
+    --warm-foreground: 42 60% 98%;
+    --fresh: 155 50% 38%;
+    --fresh-foreground: 42 60% 98%;
 
-    --sidebar-background: 155 24% 23%;
-    --sidebar-foreground: 39 50% 96%;
-    --sidebar-primary: 41 49% 56%;
-    --sidebar-primary-foreground: 155 36% 17%;
-    --sidebar-accent: 155 20% 28%;
-    --sidebar-accent-foreground: 39 50% 96%;
-    --sidebar-border: 155 20% 28%;
-    --sidebar-ring: 41 49% 56%;
+    --sidebar-background: 220 30% 14%;
+    --sidebar-foreground: 42 60% 96%;
+    --sidebar-primary: 48 96% 60%;
+    --sidebar-primary-foreground: 220 25% 12%;
+    --sidebar-accent: 220 25% 22%;
+    --sidebar-accent-foreground: 42 60% 96%;
+    --sidebar-border: 220 25% 22%;
+    --sidebar-ring: 48 96% 60%;
 
-    --success: 155 35% 35%;
-    --success-foreground: 39 50% 96%;
-    --warning: 38 80% 50%;
-    --warning-foreground: 155 36% 17%;
+    --success: 155 50% 38%;
+    --success-foreground: 42 60% 98%;
+    --warning: 48 96% 50%;
+    --warning-foreground: 220 25% 12%;
   }
 
   .dark {
-    --background: 155 30% 10%;
-    --foreground: 39 45% 93%;
+    --background: 220 30% 10%;
+    --foreground: 42 60% 96%;
 
-    --card: 155 25% 14%;
-    --card-foreground: 39 45% 93%;
+    --card: 220 25% 14%;
+    --card-foreground: 42 60% 96%;
 
-    --popover: 155 25% 14%;
-    --popover-foreground: 39 45% 93%;
+    --popover: 220 25% 14%;
+    --popover-foreground: 42 60% 96%;
 
-    --primary: 41 49% 56%;
-    --primary-foreground: 155 36% 12%;
+    --primary: 220 90% 62%;
+    --primary-foreground: 220 30% 10%;
 
-    --secondary: 155 20% 18%;
-    --secondary-foreground: 39 45% 93%;
+    --secondary: 220 20% 18%;
+    --secondary-foreground: 42 60% 96%;
 
-    --muted: 155 20% 18%;
-    --muted-foreground: 39 20% 70%;
+    --muted: 220 20% 18%;
+    --muted-foreground: 42 20% 70%;
 
-    --accent: 41 49% 56%;
-    --accent-foreground: 155 36% 12%;
+    --accent: 18 88% 60%;
+    --accent-foreground: 220 30% 10%;
 
-    --destructive: 0 60% 40%;
-    --destructive-foreground: 39 45% 93%;
+    --destructive: 0 65% 45%;
+    --destructive-foreground: 42 60% 96%;
 
-    --border: 155 20% 22%;
-    --input: 155 20% 22%;
-    --ring: 41 49% 56%;
+    --border: 220 18% 22%;
+    --input: 220 18% 22%;
+    --ring: 220 90% 62%;
 
-    --pop: 41 49% 56%;
-    --pop-foreground: 155 36% 12%;
-    --warm: 18 55% 55%;
-    --warm-foreground: 39 45% 93%;
-    --fresh: 155 30% 40%;
-    --fresh-foreground: 39 45% 93%;
+    --pop: 48 96% 62%;
+    --pop-foreground: 220 30% 10%;
+    --warm: 18 88% 60%;
+    --warm-foreground: 42 60% 96%;
+    --fresh: 155 50% 45%;
+    --fresh-foreground: 42 60% 96%;
 
-    --sidebar-background: 155 30% 10%;
-    --sidebar-foreground: 39 45% 93%;
-    --sidebar-primary: 41 49% 56%;
-    --sidebar-primary-foreground: 155 36% 12%;
-    --sidebar-accent: 155 20% 18%;
-    --sidebar-accent-foreground: 39 45% 93%;
-    --sidebar-border: 155 20% 22%;
-    --sidebar-ring: 41 49% 56%;
+    --sidebar-background: 220 30% 10%;
+    --sidebar-foreground: 42 60% 96%;
+    --sidebar-primary: 48 96% 60%;
+    --sidebar-primary-foreground: 220 30% 10%;
+    --sidebar-accent: 220 20% 18%;
+    --sidebar-accent-foreground: 42 60% 96%;
+    --sidebar-border: 220 18% 22%;
+    --sidebar-ring: 48 96% 60%;
 
-    --success: 155 35% 45%;
-    --success-foreground: 39 45% 93%;
-    --warning: 38 75% 55%;
-    --warning-foreground: 155 36% 12%;
+    --success: 155 50% 45%;
+    --success-foreground: 42 60% 96%;
+    --warning: 48 90% 55%;
+    --warning-foreground: 220 30% 10%;
   }
 }
 
@@ -118,13 +118,13 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', sans-serif;
+    font-family: 'DM Sans', system-ui, sans-serif;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Lora', Georgia, serif;
-    font-weight: 600;
-    letter-spacing: -0.01em;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.02em;
   }
 }
 
@@ -156,7 +156,7 @@
   }
 
   .card-gradient {
-    background: linear-gradient(135deg, hsl(var(--primary)), hsl(155 30% 18%));
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(220 60% 35%));
   }
 
   .hover-pop {
