@@ -210,12 +210,12 @@ const Profile = () => {
               <Textarea id="bio" value={form.bio} onChange={(e) => update("bio", e.target.value)} rows={3} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="third_space">Favorite Third Space in Baltimore</Label>
+              <Label htmlFor="third_space">Favorite Third Space</Label>
               <Input
                 id="third_space"
                 value={form.favorite_third_space}
                 onChange={(e) => update("favorite_third_space", e.target.value)}
-                placeholder="e.g. Red Emma's, Patterson Park, a walk along the harbor..."
+                placeholder="e.g. a café, a park, a walk along the harbor..."
               />
               <p className="text-xs text-muted-foreground">
                 A place you'd suggest for meeting another community member — a park, café, walkway, etc.
