@@ -56,7 +56,6 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           </p>
           <div className="flex gap-4 text-sm">
             <Link to="/about" className="text-muted-foreground hover:text-foreground">About</Link>
-            <Link to="/demo" className="text-muted-foreground hover:text-foreground">Try a live demo →</Link>
           </div>
         </div>
       </footer>
