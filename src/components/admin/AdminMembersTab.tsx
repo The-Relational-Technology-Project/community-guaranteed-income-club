@@ -108,7 +108,7 @@ const AdminMembersTab = ({ profiles, runs, onRefresh }: AdminMembersTabProps) =>
         if (amount > 0.01) {
           const handle = receivers[ri].venmo_handle;
           const venmoLink = handle
-            ? `https://venmo.com/${handle.replace("@", "")}?txn=pay&amount=${amount.toFixed(2)}&note=Baltimore%20Community%20GI%20Program`
+            ? `https://venmo.com/${handle.replace("@", "")}?txn=pay&amount=${amount.toFixed(2)}&note=Community%20Guaranteed%20Income%20Club`
             : null;
 
           txns.push({

@@ -96,7 +96,7 @@ const MemberHome = () => {
   };
 
   const venmoLink = thisMonth?.receiver?.venmo_handle
-    ? `https://venmo.com/${thisMonth.receiver.venmo_handle.replace(/^@/, "")}?txn=pay&amount=${thisMonth.amount}&note=${encodeURIComponent(note || "Mutualist Club")}`
+    ? `https://venmo.com/${thisMonth.receiver.venmo_handle.replace(/^@/, "")}?txn=pay&amount=${thisMonth.amount}&note=${encodeURIComponent(note || "Community Guaranteed Income Club")}`
     : null;
 
   return (
@@ -147,7 +147,7 @@ const MemberHome = () => {
                 <Textarea
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
-                  placeholder="e.g. Finally finished the garden bed this week — what's your favorite Baltimore coffee?"
+                  placeholder="e.g. Finally finished the garden bed this week — what's your favorite coffee spot?"
                   rows={2}
                 />
                 <div className="flex flex-wrap gap-2">

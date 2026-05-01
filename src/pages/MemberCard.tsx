@@ -4,11 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "@/hooks/use-toast";
 import { Copy, Apple, Smartphone } from "lucide-react";
-import crest from "@/assets/crest.png";
+import { ClubMark } from "@/components/Wordmark";
+import { CHAPTER, ORG } from "@/lib/chapter";
 
 const MemberCard = () => {
   const { user, profile } = useAuth();
-  const referralCode = `BMC-${(user?.id ?? "").replace(/-/g, "").slice(-4).toUpperCase() || "0000"}`;
+  const referralCode = `CGIC-${(user?.id ?? "").replace(/-/g, "").slice(-4).toUpperCase() || "0000"}`;
   const memberSince = profile?.created_at
     ? new Date(profile.created_at).toLocaleDateString("en-US", { month: "long", year: "numeric" })
     : "—";
@@ -29,25 +30,29 @@ const MemberCard = () => {
 
       <Card className="card-gradient text-primary-foreground p-6 md:p-8 rounded-2xl border-2 border-accent/40 relative overflow-hidden shadow-xl">
         <div className="absolute inset-0 pattern-dots opacity-20 pointer-events-none" />
-        <div className="absolute -top-6 -right-6 w-32 h-32 rounded-full bg-accent/15 pointer-events-none" />
+        <div className="absolute -top-6 -right-6 w-32 h-32 rounded-full bg-pop/25 pointer-events-none" />
+        <div className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full bg-accent/20 pointer-events-none" />
 
         <div className="relative flex items-start justify-between">
           <div>
-            <p className="font-serif text-sm opacity-80 leading-tight">The Baltimore</p>
-            <p className="font-serif text-2xl text-accent leading-tight">Mutualist Club</p>
+            <p className="font-display font-bold text-xs uppercase tracking-widest opacity-80 leading-tight">Community Guaranteed</p>
+            <p className="font-display font-bold text-2xl text-pop leading-tight">Income Club</p>
+            <p className="text-[10px] uppercase tracking-wider opacity-70 mt-1">{CHAPTER.fullName}</p>
           </div>
-          <img src={crest} alt="Club crest" className="h-16 w-16 rounded-full ring-2 ring-accent/40 object-cover bg-card" />
+          <div className="bg-card rounded-full p-2 ring-2 ring-pop/40">
+            <ClubMark size={48} />
+          </div>
         </div>
 
         <div className="relative mt-10 flex items-center gap-4">
-          <Avatar className="h-16 w-16 ring-2 ring-accent">
+          <Avatar className="h-16 w-16 ring-2 ring-pop">
             <AvatarImage src={profile?.photo_url ?? undefined} />
-            <AvatarFallback className="bg-accent text-accent-foreground font-serif text-xl">
+            <AvatarFallback className="bg-pop text-pop-foreground font-display font-bold text-xl">
               {profile?.name?.charAt(0) ?? "?"}
             </AvatarFallback>
           </Avatar>
           <div>
-            <p className="font-serif text-2xl">{profile?.name ?? "Member"}</p>
+            <p className="font-display font-bold text-2xl">{profile?.name ?? "Member"}</p>
             <p className="text-xs uppercase tracking-wider opacity-70">Member since {memberSince}</p>
           </div>
         </div>
@@ -55,7 +60,7 @@ const MemberCard = () => {
         <div className="relative mt-8 pt-6 border-t border-primary-foreground/20 flex items-end justify-between">
           <div>
             <p className="text-[10px] uppercase tracking-widest opacity-70">Referral code</p>
-            <p className="font-mono text-xl text-accent">{referralCode}</p>
+            <p className="font-mono text-xl text-pop">{referralCode}</p>
           </div>
           <p className="font-serif text-xs opacity-70 italic">"susu, tanda, hui — carrying it forward."</p>
         </div>

@@ -116,7 +116,7 @@ const Transactions = () => {
   const buildVenmoLink = (handle: string | null, amount: number) => {
     if (!handle) return null;
     const cleanHandle = handle.replace("@", "");
-    return `https://venmo.com/${cleanHandle}?txn=pay&amount=${amount}&note=Baltimore%20Community%20GI%20Program`;
+    return `https://venmo.com/${cleanHandle}?txn=pay&amount=${amount}&note=Community%20Guaranteed%20Income%20Club`;
   };
 
   const getConnectionPrompt = (txnId: string) => {
