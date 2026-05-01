@@ -1,107 +1,71 @@
+# Rebrand: Community Guaranteed Income Club
 
-# Admin transaction visibility, member history, steward-managed accounts
+Rename the app from "The Baltimore Mutualist Club" to **Community Guaranteed Income Club** (CGIC), positioned as starting in Baltimore but designed to spread. Return to the previously approved Mamdani/Oatly-inspired vibrant aesthetic (per `mem://style/branding-aesthetic`), still distinctly non-SaaSy.
 
-Scope this round: feedback items **#1, #2, #3, and the no-email accessibility item** (as steward-managed accounts). Holding **#4 nudge automation, #5 Resend/Lovable Emails, #6 magic links** — all blocked on choosing the email domain. SMS-based accounts deferred until Twilio is connected.
+## Naming & voice
 
----
+- **Full name**: Community Guaranteed Income Club
+- **Short name**: CGIC (used sparingly, e.g. referral codes)
+- **Current chapter**: "Baltimore chapter" — referenced in copy but no longer the brand. Future-proof for multi-tenant chapters (Baltimore is the first).
+- **Tagline options** (we'll pick one): "A guaranteed income, guaranteed by your community." / "Neighbors funding neighbors, every month."
+- **Domain**: communityguaranteedincome.club (update meta tags / OG)
 
-## #1 — Admin: Sent & Received side-by-side per member
+## Visual identity (return to Mamdani/Oatly vibe)
 
-**Edit `src/components/admin/AdminMembersTab.tsx`**
-- Convert the existing single-row member table into rows that **expand** on click (chevron toggle), revealing a per-member panel.
-- New component `src/components/admin/MemberTransactionPanel.tsx`:
-  - Two columns: **Sent** (left) and **Received** (right).
-  - Each column lists transactions newest-first, grouped by `calculation_runs.run_date` (month header).
-  - Shows: counterparty name + photo, amount, sender-confirmed ✓ / receiver-confirmed ✓ badges, `created_at`.
-  - Footer totals: lifetime sent, lifetime received, net.
-  - Empty state per column ("No sends yet" / "No receipts yet").
-- Query: one `transactions` select filtered by `sender_id.eq.{id},receiver_id.eq.{id}` plus a profiles lookup map (already in props) and a runs map (already in props). No new RPC.
+- **Palette** (HSL tokens in `src/index.css`):
+  - Primary: Electric Blue `220 90% 56%`
+  - Accent: Warm Orange `18 88% 58%`
+  - Pop: Bright Yellow `48 96% 60%`
+  - Fresh: Deep Green `155 50% 38%`
+  - Background: Off-white cream `42 60% 96%`
+  - Foreground: Near-black ink `220 20% 12%`
+  - Card: White `0 0% 100%`
+- **Typography**: Space Grotesk (display/headings, replaces Lora) + DM Sans (body, replaces Inter). Update Google Fonts import + `tailwind.config.ts` font families.
+- **Shapes & motion**: Bold color blocks, overlapping circles (community), organic SVG wave dividers between sections (replaces current dot pattern hero), gentle hover-pop. Keep generous border radius.
+- **Logo / crest**: Existing `crest.png` was made for the Mutualist Club. Replace the wordmark in headers with a typographic CGIC mark — bold Space Grotesk lockup with a small circle motif (3 overlapping circles in blue/orange/yellow representing the pooled flow). Build as inline SVG component (`src/components/Wordmark.tsx`) so it scales and recolors cleanly. Keep `crest.png` available but de-emphasize until a new mark is commissioned.
 
-## #2 — Admin: Global transactions ledger
+## Pages & components to update
 
-**Edit `src/pages/admin/AdminDashboard.tsx`**
-- Add a new tab **Transactions** (icon: `ArrowLeftRight`) between Math and Emails.
-- New component `src/components/admin/AdminTransactionsTab.tsx`:
-  - Full table of every `transactions` row, joined with sender + receiver profile (name, photo).
-  - Filters: run (dropdown of recent runs), confirmation status (all / pending sender / pending receiver / fully confirmed), free-text search on member names.
-  - Each row: date · sender → receiver · amount · sender-confirmed badge · receiver-confirmed badge · row actions menu.
-  - Row action: **"Mark sender confirmed (manual)"** / **"Mark receiver confirmed (manual)"** — admin override that writes `is_confirmed_*` + `confirmed_*_at = now()`. RLS already permits admins via the `Admins can manage transactions`-style policies; the existing UPDATE policies cover sender/receiver self-confirm — we'll add a small admin UPDATE policy via migration so admins can override either side.
-  - CSV export button (client-side) for the currently-filtered set.
+1. **`index.html`** — title, description, OG tags → "Community Guaranteed Income Club".
+2. **`src/index.css`** — swap palette tokens, swap font import to Space Grotesk + DM Sans, keep utility classes (`pattern-dots`, `card-gradient`) but retune colors. Add an `svg-wave` divider utility.
+3. **`tailwind.config.ts`** — update `fontFamily.serif/display` → Space Grotesk; `body/sans` → DM Sans.
+4. **`src/components/Wordmark.tsx`** (new) — typographic logo + small circles SVG mark, replaces crest+text in `Layout.tsx` and `MemberLayout.tsx`.
+5. **`src/components/Layout.tsx`** — replace name string, swap crest for Wordmark, footer tagline ("All flourishing is mutual." → keep, it still fits), nav buttons unchanged.
+6. **`src/components/MemberLayout.tsx`** — same wordmark swap.
+7. **`src/pages/Landing.tsx`** — full visual refresh:
+   - Hero: bold headline in Space Grotesk, blue background block with yellow/orange accent shapes, "Baltimore chapter — first of many" eyebrow.
+   - Stats strip: keep, restyle in primary blue with yellow numerals.
+   - Story section: keep Kimmerer quote.
+   - How it works cards: bold colored cards (blue/orange/yellow backgrounds rotating).
+   - Calculator: cleaner, more colorful result reveal.
+   - Replace `pattern-dots` hero bg with an SVG wave divider between sections.
+   - CTA section: orange or yellow block instead of current primary.
+8. **`src/pages/About.tsx`** — rename, reframe story as "Started in Baltimore, designed to spread." Add a short "What's a chapter?" paragraph.
+9. **`src/pages/MemberCard.tsx`** — update card design: "Community Guaranteed Income Club" header, "Baltimore Chapter" subline, referral code prefix changes from `BMC-` → `CGIC-`. Keep wallet placeholders.
+10. **`src/pages/MemberHome.tsx`, `Profile.tsx`, `Transactions.tsx`** — replace any "Baltimore Mutualist Club" / "BMC" strings; update tone strings if any reference the old name.
+11. **`src/components/admin/AdminMembersTab.tsx`** — string updates only.
+12. **`src/pages/Demo.tsx`** — keep as-is functionally; update brand strings.
 
-**Migration**: add policy `Admins can update any transaction` on `transactions` for `UPDATE` using `has_role(auth.uid(), 'admin')`.
+## Multi-tenant readiness (light touch, no schema changes yet)
 
-## #3 — Member profile: transaction & confirmation history
+- Centralize chapter config in `src/lib/chapter.ts`:
+  ```ts
+  export const CHAPTER = { name: "Baltimore", slug: "baltimore", city: "Baltimore, MD" };
+  export const ORG = { name: "Community Guaranteed Income Club", short: "CGIC", domain: "communityguaranteedincome.club" };
+  ```
+  Use these constants in Layout, Landing, About, MemberCard. When we go multi-tenant, this becomes a hook backed by the DB.
+- No DB migration this round. Schema-level chapter scoping is a future pass.
 
-**Edit `src/pages/Profile.tsx`**
-- Below the existing form, add a new section using new component `src/components/profile/TransactionHistory.tsx`.
-- Shows the signed-in user's own transactions, grouped by month (run), split into **You sent** / **You received**.
-- Each item: counterparty name + photo, amount, your confirmation status with a quick "Mark sent" / "Mark received" inline action when still pending (re-uses the same update logic that `Transactions.tsx` already uses, so we'll factor a tiny shared helper `src/lib/confirmTransaction.ts`).
-- Footer: lifetime totals (sent / received / count of months participated).
-- No schema change. RLS already lets a user select their own transactions.
+## Out of scope this pass
 
-## No-email accessibility — Steward-managed accounts
+- New crest illustration (placeholder typographic mark for now; can commission art later).
+- Custom domain DNS setup (separate flow when ready).
+- Multi-tenant DB schema (tracked for later).
+- Any auth, transactions, or admin logic changes.
 
-The lead admin asked for accessibility for people without email. We're handling it as **steward-created accounts with placeholder emails**. SMS comes later when Twilio is wired.
+## Files to create / edit
 
-**Migration**
-- Add column `profiles.is_steward_managed boolean not null default false`.
-- Add column `profiles.contact_method text` (`'email' | 'phone' | 'in_person'`, default `'email'`) — informational; the auth row still uses an email under the hood.
-- Add column `profiles.contact_notes text` — free text for steward (e.g. "call Tuesdays after 5pm", "drops by the library").
+**Create**: `src/components/Wordmark.tsx`, `src/lib/chapter.ts`
+**Edit**: `index.html`, `src/index.css`, `tailwind.config.ts`, `src/components/Layout.tsx`, `src/components/MemberLayout.tsx`, `src/pages/Landing.tsx`, `src/pages/About.tsx`, `src/pages/MemberCard.tsx`, `src/pages/MemberHome.tsx`, `src/pages/Profile.tsx`, `src/pages/Transactions.tsx`, `src/components/admin/AdminMembersTab.tsx`, `src/pages/Demo.tsx`
 
-**Admin UI — `AdminMembersTab.tsx`**
-- New button **"Add member without email"** opens a dialog (`src/components/admin/AddManagedMemberDialog.tsx`):
-  - Fields: name (required), phone, ZIP, contact method (`phone` / `in_person`), contact notes, post-tax monthly income, Venmo handle.
-  - Submission calls a new edge function `admin-create-managed-member` that:
-    1. Verifies the caller is admin (validates JWT + checks `user_roles`).
-    2. Creates an `auth.users` row via the service-role admin API with a synthetic email `managed-{shortid}@no-email.local` and a random password (never surfaced).
-    3. The existing `handle_new_user` trigger creates the matching `profiles` row.
-    4. Patches the new profile with the dialog's fields + `is_steward_managed = true` + `contact_method` + `contact_notes`.
-    5. Returns the profile id.
-  - On success, refresh the members list and toast.
-- Members table: show a small **"Steward-managed"** badge next to managed members and surface `contact_method` + `contact_notes` in the expanded panel from #1 so the steward knows how to actually reach them at handoff time.
-
-**Member-experience implications**
-- Steward-managed members can still appear as senders/receivers in `transactions` exactly like normal members — the algorithm in `AdminMembersTab.runCalculation` doesn't care.
-- Confirmation buttons for them are clicked **by the steward** from the new admin transactions ledger (#2's manual-confirm action). No member-side login required.
-
-**Edge function** `supabase/functions/admin-create-managed-member/index.ts`
-- Standard CORS + JSON validation (Zod).
-- Uses `SUPABASE_SERVICE_ROLE_KEY` (already a secret).
-- Will be deployed automatically.
-
-## Holds — confirming what we're NOT doing this pass
-
-- **#4 Auto-nudge after n+2 days unconfirmed** — needs an email sender. Hold until domain.
-- **#5 Resend vs Lovable Emails** — will recommend Lovable Emails (built-in, no key) when we get to it; final call after domain pick.
-- **#6 Magic links** — already partially built into login/signup but the magic-link delivery itself rides on whichever email setup we land on. Hold the deeper work until domain.
-- **SMS accessibility** — held for Twilio.
-
-## Files
-
-**Created**
-- `src/components/admin/MemberTransactionPanel.tsx`
-- `src/components/admin/AdminTransactionsTab.tsx`
-- `src/components/admin/AddManagedMemberDialog.tsx`
-- `src/components/profile/TransactionHistory.tsx`
-- `src/lib/confirmTransaction.ts`
-- `supabase/functions/admin-create-managed-member/index.ts`
-
-**Edited**
-- `src/components/admin/AdminMembersTab.tsx` (expandable rows + Add managed-member CTA + badges)
-- `src/pages/admin/AdminDashboard.tsx` (new Transactions tab, fetch wiring)
-- `src/pages/Profile.tsx` (mount TransactionHistory)
-- `src/pages/Transactions.tsx` (refactor confirm logic to use shared helper — no UX change)
-
-**Migrations**
-1. `profiles`: add `is_steward_managed`, `contact_method`, `contact_notes`.
-2. `transactions`: add `Admins can update any transaction` RLS policy.
-
-No changes to: auth flow, calculation algorithm, existing member nav, mock event/board data.
-
-## Verification checklist
-
-- Admin → Members: clicking a member row expands to two-column Sent/Received history with totals.
-- Admin → Transactions: every transaction visible, filterable by run + status, searchable by name, manual-confirm overrides write to DB and reflect immediately.
-- Profile (any signed-in member): "Your transaction history" section shows their own past sends/receipts grouped by month with inline confirm for pending items.
-- Admin can add a member with no email; that member shows up in the roster with a "Steward-managed" badge, gets included in the next monthly calculation, and the steward can mark their transactions confirmed manually.
-- No regressions in `/demo`, magic-link login, or admin login.
+After approval I'll also update the project memory (`mem://index.md`, `mem://style/branding-aesthetic`) to reflect the new name and reaffirm the Mamdani palette/fonts.
