@@ -1,17 +1,18 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import crest from "@/assets/crest.png";
+import { ClubMark } from "@/components/Wordmark";
+import { CHAPTER, ORG } from "@/lib/chapter";
 
 const About = () => {
   return (
     <div className="container mx-auto px-4 py-12 max-w-3xl">
       <div className="text-center mb-12">
-        <img src={crest} alt="Baltimore Mutualist Club crest" className="h-48 w-48 md:h-64 md:w-64 mx-auto rounded-full ring-2 ring-accent/40 bg-card object-cover shadow-lg" />
-        <p className="text-xs uppercase tracking-[0.25em] text-accent mt-6">About</p>
-        <h1 className="font-serif text-5xl mt-3">The Baltimore Mutualist Club</h1>
-        <p className="font-serif italic text-muted-foreground mt-4">
-          A circle of neighbors carrying forward an old, old idea.
+        <div className="mx-auto mb-2 flex justify-center"><ClubMark size={120} /></div>
+        <p className="text-xs uppercase tracking-[0.25em] text-accent mt-6 font-bold">About</p>
+        <h1 className="font-display font-bold text-5xl md:text-6xl mt-3 tracking-tight">{ORG.name}</h1>
+        <p className="font-serif italic text-muted-foreground mt-4 text-lg">
+          A circle of neighbors carrying forward an old, old idea — starting in {CHAPTER.name}.
         </p>
       </div>
 
@@ -25,8 +26,25 @@ const About = () => {
               needed it most.
             </p>
             <p>
-              That pilot ran for 20 people without a single hiccup. Today we're 50+ members and growing —
-              with a goal of 150 by the end of the year.
+              That pilot ran for 20 people without a single hiccup. Today the {CHAPTER.name} chapter is 50+ members
+              and growing — with a goal of 150 by the end of the year.
+            </p>
+            <p>
+              The Club started in {CHAPTER.name}, but it's designed to spread. Wherever there are neighbors
+              who want to carry something together, a chapter can take root.
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader><CardTitle className="font-serif">What's a chapter?</CardTitle></CardHeader>
+          <CardContent className="space-y-4 text-muted-foreground leading-relaxed">
+            <p>
+              A chapter is a local group of neighbors — small enough to know each other's names,
+              big enough to make a real dent each month. {CHAPTER.name} is the first.
+            </p>
+            <p>
+              Want to start one where you live? Reach out — we're sketching out the playbook.
             </p>
           </CardContent>
         </Card>
