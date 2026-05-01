@@ -2,6 +2,8 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import Wordmark, { ClubMark } from "@/components/Wordmark";
+import { CHAPTER } from "@/lib/chapter";
 import {
   Home,
   Users,
@@ -40,9 +42,15 @@ const MemberLayout = ({ children }: { children: React.ReactNode }) => {
     <div className="min-h-screen bg-background flex flex-col md:flex-row">
       {/* Desktop sidebar */}
       <aside className="hidden md:flex w-64 flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border">
-        <Link to="/home" className="px-6 py-6 border-b border-sidebar-border">
-          <p className="font-serif text-lg leading-tight text-sidebar-foreground">The Baltimore</p>
-          <p className="font-serif text-xl leading-tight text-sidebar-primary">Mutualist Club</p>
+        <Link to="/home" className="px-5 py-6 border-b border-sidebar-border block">
+          <div className="flex items-center gap-2">
+            <ClubMark size={32} />
+            <div className="leading-tight">
+              <p className="font-display font-bold text-xs text-sidebar-foreground/80">Community Guaranteed</p>
+              <p className="font-display font-bold text-lg text-sidebar-primary">Income Club</p>
+              <p className="text-[10px] uppercase tracking-wider text-sidebar-foreground/60 mt-0.5">{CHAPTER.name} chapter</p>
+            </div>
+          </div>
         </Link>
         <nav className="flex-1 px-3 py-4 space-y-1">
           {links.map((l) => (
@@ -99,8 +107,9 @@ const MemberLayout = ({ children }: { children: React.ReactNode }) => {
 
       {/* Mobile top bar */}
       <header className="md:hidden bg-sidebar text-sidebar-foreground px-4 py-3 flex items-center justify-between border-b border-sidebar-border">
-        <Link to="/home">
-          <p className="font-serif text-base leading-tight">Mutualist Club</p>
+        <Link to="/home" className="flex items-center gap-2">
+          <ClubMark size={24} />
+          <p className="font-display font-bold text-base leading-tight">CGI Club <span className="text-xs font-medium text-sidebar-foreground/70">· {CHAPTER.name}</span></p>
         </Link>
         <Link to="/profile">
           <Avatar className="h-8 w-8">
