@@ -27,7 +27,7 @@ export const ClubMark = ({ size = 36 }: { size?: number }) => (
   </svg>
 );
 
-const Wordmark = ({ to = "/", variant = "default", showChapter = true, className = "" }: WordmarkProps) => {
+const Wordmark = ({ to = "/", variant = "default", showChapter = false, className = "" }: WordmarkProps) => {
   const compact = variant === "compact";
   const light = variant === "light";
 
