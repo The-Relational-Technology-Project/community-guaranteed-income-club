@@ -23,7 +23,12 @@ interface AdminKPIDashboardProps {
 }
 
 const AdminKPIDashboard = ({ profiles, runs, transactions }: AdminKPIDashboardProps) => {
-  const activeCount = profiles.filter((p) => p.participant_status === "active").length;
+  // Prefer the most recent finalized run as the source of truth for "active" stats
+  const sortedRuns = runs.slice().sort((a, b) => new Date(b.run_date).getTime() - new Date(a.run_date).getTime());
+  const lastRun = sortedRuns[0];
+
+  const liveActiveCount = profiles.filter((p) => p.participant_status === "active").length;
+  const activeCount = lastRun?.participant_count ?? liveActiveCount;
   const waitlistedCount = profiles.filter((p) => p.participant_status === "waitlisted").length;
   const totalMembers = profiles.length;
 
@@ -32,11 +37,12 @@ const AdminKPIDashboard = ({ profiles, runs, transactions }: AdminKPIDashboardPr
   const confirmedCount = transactions.filter((t) => t.is_confirmed_sender && t.is_confirmed_receiver).length;
   const confirmationRate = totalTransactions > 0 ? Math.round((confirmedCount / totalTransactions) * 100) : 0;
 
-  // Average income of active members
+  // Average income — prefer last run's snapshot, fall back to live data
   const activeProfiles = profiles.filter((p) => p.participant_status === "active");
-  const avgIncome = activeProfiles.length > 0
+  const liveAvgIncome = activeProfiles.length > 0
     ? activeProfiles.reduce((sum, p) => sum + Number(p.post_tax_monthly_income ?? 0), 0) / activeProfiles.length
     : 0;
+  const avgIncome = lastRun?.average_income ? Number(lastRun.average_income) : liveAvgIncome;
 
   // Pool over time chart data (sorted chronologically)
   const poolOverTime = runs

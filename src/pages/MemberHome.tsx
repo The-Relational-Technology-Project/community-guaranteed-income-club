@@ -209,17 +209,22 @@ const MemberHome = () => {
         </div>
         <div className="grid md:grid-cols-3 gap-4">
           {mockEvents.map((e) => (
-            <Card key={e.id} className="hover-pop">
-              <CardContent className="p-5">
-                <Calendar className="h-5 w-5 text-accent mb-2" />
-                <p className="text-xs uppercase tracking-wider text-muted-foreground">{e.date} · {e.time}</p>
-                <h3 className="font-serif text-lg mt-1 leading-tight">{e.title}</h3>
-                <p className="flex items-center gap-1 text-sm text-muted-foreground mt-2">
-                  <MapPin className="h-3 w-3" /> {e.location}
-                </p>
-                <p className="text-xs text-muted-foreground mt-2">{e.attendees} going</p>
-              </CardContent>
-            </Card>
+            <Link key={e.id} to={`/events#${e.id}`} className="block">
+              <Card className="hover-pop h-full transition-shadow hover:shadow-md">
+                <CardContent className="p-5">
+                  <Calendar className="h-5 w-5 text-accent mb-2" />
+                  <p className="text-xs uppercase tracking-wider text-muted-foreground">{e.date} · {e.time}</p>
+                  <h3 className="font-serif text-lg mt-1 leading-tight">{e.title}</h3>
+                  <p className="flex items-center gap-1 text-sm text-muted-foreground mt-2">
+                    <MapPin className="h-3 w-3" /> {e.location}
+                  </p>
+                  <div className="flex items-center justify-between mt-2">
+                    <p className="text-xs text-muted-foreground">{e.attendees} going</p>
+                    <span className="text-xs font-medium text-primary">RSVP →</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
           ))}
         </div>
       </section>

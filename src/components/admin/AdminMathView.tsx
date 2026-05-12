@@ -42,8 +42,10 @@ const AdminMathView = ({ profiles, runs, onRefresh }: AdminMathViewProps) => {
 
   const contributions = activeProfiles.map((p) => {
     const income = Number(p.post_tax_monthly_income ?? 0);
-    const contribution = income * 0.07;
-    return { id: p.id, name: p.name, income, contribution, venmo_handle: p.venmo_handle };
+    const loans = Number(p.student_loan_payment ?? 0);
+    const taxable = Math.max(0, income - loans);
+    const contribution = taxable * 0.07;
+    return { id: p.id, name: p.name, income, loans, contribution, venmo_handle: p.venmo_handle };
   });
 
   const totalPool = contributions.reduce((sum, c) => sum + c.contribution, 0);
@@ -77,7 +79,7 @@ const AdminMathView = ({ profiles, runs, onRefresh }: AdminMathViewProps) => {
     try {
       const { data: active } = await supabase
         .from("profiles")
-        .select("id, post_tax_monthly_income, venmo_handle")
+        .select("id, post_tax_monthly_income, student_loan_payment, venmo_handle")
         .eq("participant_status", "active");
 
       if (!active || active.length < 2) {
@@ -89,7 +91,7 @@ const AdminMathView = ({ profiles, runs, onRefresh }: AdminMathViewProps) => {
       const contribs = active.map((p) => ({
         id: p.id,
         income: Number(p.post_tax_monthly_income),
-        contribution: Number(p.post_tax_monthly_income) * 0.07,
+        contribution: Math.max(0, Number(p.post_tax_monthly_income) - Number(p.student_loan_payment ?? 0)) * 0.07,
         venmo_handle: p.venmo_handle,
       }));
 
@@ -314,6 +316,7 @@ const AdminMathView = ({ profiles, runs, onRefresh }: AdminMathViewProps) => {
               <TableRow>
                 <TableHead>Name</TableHead>
                 <TableHead className="text-right">Monthly Income</TableHead>
+                <TableHead className="text-right">Student Loans</TableHead>
                 <TableHead className="text-right">7% Contribution</TableHead>
                 <TableHead className="text-right">Equal Share</TableHead>
                 <TableHead className="text-right">Net Amount</TableHead>
@@ -325,6 +328,7 @@ const AdminMathView = ({ profiles, runs, onRefresh }: AdminMathViewProps) => {
                 <TableRow key={row.id}>
                   <TableCell className="font-medium">{row.name}</TableCell>
                   <TableCell className="text-right">${row.income.toLocaleString()}</TableCell>
+                  <TableCell className="text-right text-muted-foreground">${row.loans.toLocaleString()}</TableCell>
                   <TableCell className="text-right text-muted-foreground">${row.contribution.toFixed(2)}</TableCell>
                   <TableCell className="text-right text-muted-foreground">${equalShare.toFixed(2)}</TableCell>
                   <TableCell className={`text-right font-medium ${row.net > 0 ? "text-green-600 dark:text-green-400" : row.net < 0 ? "text-red-600 dark:text-red-400" : ""}`}>
@@ -351,7 +355,7 @@ const AdminMathView = ({ profiles, runs, onRefresh }: AdminMathViewProps) => {
         </CardHeader>
         <CardContent>
           <div className="font-mono text-sm space-y-2 bg-muted p-4 rounded-md">
-            <p><span className="text-muted-foreground">contribution</span> = income × 0.07</p>
+            <p><span className="text-muted-foreground">contribution</span> = max(0, income − student_loans) × 0.07</p>
             <p><span className="text-muted-foreground">total_pool</span> = Σ all contributions = <strong>${totalPool.toFixed(2)}</strong></p>
             <p><span className="text-muted-foreground">equal_share</span> = total_pool ÷ {contributions.length} participants = <strong>${equalShare.toFixed(2)}</strong></p>
             <p><span className="text-muted-foreground">net_amount</span> = equal_share − contribution</p>
