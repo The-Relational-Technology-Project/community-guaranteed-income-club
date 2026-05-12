@@ -2,7 +2,7 @@
 // From: notifications@communityguaranteedincome.club (verified domain in Resend)
 
 const RESEND_API_URL = "https://api.resend.com/emails";
-export const FROM_ADDRESS = "Community Guaranteed Income Club <notifications@communityguaranteedincome.club>";
+export const FROM_ADDRESS = "Baltimore Community Guaranteed Income Club <notifications@communityguaranteedincome.club>";
 
 export interface SendEmailInput {
   to: string | string[];

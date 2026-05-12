@@ -21,6 +21,7 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Play, ChevronDown, ChevronRight, UserPlus, Mail } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { Fragment, useMemo, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Tables } from "@/integrations/supabase/types";
@@ -63,6 +64,19 @@ const AdminMembersTab = ({ profiles, runs, onRefresh }: AdminMembersTabProps) =>
     }
   };
 
+  const updateVerified = async (profileId: string, value: boolean) => {
+    const { error } = await supabase
+      .from("profiles")
+      .update({ is_verified: value })
+      .eq("id", profileId);
+    if (error) {
+      toast({ title: "Couldn't update verification", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: value ? "Marked verified" : "Verification removed" });
+      onRefresh();
+    }
+  };
+
   const sendWelcomeEmail = async (profileId: string, name: string) => {
     setSendingWelcome(profileId);
     const { data, error } = await supabase.functions.invoke("send-email", {
@@ -87,7 +101,7 @@ const AdminMembersTab = ({ profiles, runs, onRefresh }: AdminMembersTabProps) =>
     try {
       const { data: active } = await supabase
         .from("profiles")
-        .select("id, post_tax_monthly_income, venmo_handle")
+        .select("id, post_tax_monthly_income, student_loan_payment, venmo_handle")
         .eq("participant_status", "active");
 
       if (!active || active.length < 2) {
@@ -99,7 +113,7 @@ const AdminMembersTab = ({ profiles, runs, onRefresh }: AdminMembersTabProps) =>
       const contributions = active.map((p) => ({
         id: p.id,
         income: Number(p.post_tax_monthly_income),
-        contribution: Number(p.post_tax_monthly_income) * 0.07,
+        contribution: Math.max(0, Number(p.post_tax_monthly_income) - Number((p as any).student_loan_payment ?? 0)) * 0.07,
         venmo_handle: p.venmo_handle,
       }));
 
@@ -244,10 +258,14 @@ const AdminMembersTab = ({ profiles, runs, onRefresh }: AdminMembersTabProps) =>
                   </TableCell>
                   <TableCell>{p.zip_code}</TableCell>
                   <TableCell>${Number(p.post_tax_monthly_income).toLocaleString()}</TableCell>
-                  <TableCell>
-                    <Badge variant={p.is_verified ? "default" : "secondary"}>
-                      {p.is_verified ? "Yes" : "No"}
-                    </Badge>
+                  <TableCell onClick={(e) => e.stopPropagation()}>
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={!!p.is_verified}
+                        onCheckedChange={(v) => updateVerified(p.id, v)}
+                      />
+                      <span className="text-xs text-muted-foreground">{p.is_verified ? "Yes" : "No"}</span>
+                    </div>
                   </TableCell>
                   <TableCell onClick={(e) => e.stopPropagation()}>
                     <Select
