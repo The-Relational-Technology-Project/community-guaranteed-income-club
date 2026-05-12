@@ -23,11 +23,13 @@ const Wave = ({ className = "", flip = false, fill = "hsl(var(--background))" }:
 
 const Landing = () => {
   const [myIncome, setMyIncome] = useState("");
+  const [studentLoans, setStudentLoans] = useState("");
   const [groupAvg, setGroupAvg] = useState("2800");
 
   const myIncomeNum = Number(myIncome) || 0;
+  const loansNum = Number(studentLoans) || 0;
   const groupAvgNum = Number(groupAvg) || 2800;
-  const myContribution = myIncomeNum * 0.07;
+  const myContribution = Math.max(0, myIncomeNum - loansNum) * 0.07;
   const equalShare = groupAvgNum * 0.07;
   const net = equalShare - myContribution;
   const hasResult = myIncomeNum > 0;
@@ -168,6 +170,16 @@ const Landing = () => {
                   value={myIncome}
                   onChange={(e) => setMyIncome(e.target.value)}
                   placeholder="e.g. 3500"
+                  className="mt-1 text-lg"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-semibold">Monthly student loan payment (subtracted before 7%)</label>
+                <Input
+                  type="number"
+                  value={studentLoans}
+                  onChange={(e) => setStudentLoans(e.target.value)}
+                  placeholder="e.g. 300"
                   className="mt-1 text-lg"
                 />
               </div>

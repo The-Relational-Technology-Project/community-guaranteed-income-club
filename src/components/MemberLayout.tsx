@@ -41,7 +41,7 @@ const MemberLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="min-h-screen bg-background flex flex-col md:flex-row">
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex w-64 flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border">
+      <aside className="hidden md:flex md:sticky md:top-0 md:h-screen w-64 flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border">
         <Link to="/home" className="px-5 py-6 border-b border-sidebar-border block">
           <div className="flex items-center gap-2">
             <ClubMark size={32} />
@@ -52,7 +52,7 @@ const MemberLayout = ({ children }: { children: React.ReactNode }) => {
             </div>
           </div>
         </Link>
-        <nav className="flex-1 px-3 py-4 space-y-1">
+        <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
           {links.map((l) => (
             <Link key={l.to} to={l.to}>
               <div
