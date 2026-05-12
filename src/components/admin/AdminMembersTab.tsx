@@ -87,7 +87,7 @@ const AdminMembersTab = ({ profiles, runs, onRefresh }: AdminMembersTabProps) =>
     try {
       const { data: active } = await supabase
         .from("profiles")
-        .select("id, post_tax_monthly_income, venmo_handle")
+        .select("id, post_tax_monthly_income, student_loan_payment, venmo_handle")
         .eq("participant_status", "active");
 
       if (!active || active.length < 2) {
@@ -99,7 +99,7 @@ const AdminMembersTab = ({ profiles, runs, onRefresh }: AdminMembersTabProps) =>
       const contributions = active.map((p) => ({
         id: p.id,
         income: Number(p.post_tax_monthly_income),
-        contribution: Number(p.post_tax_monthly_income) * 0.07,
+        contribution: Math.max(0, Number(p.post_tax_monthly_income) - Number((p as any).student_loan_payment ?? 0)) * 0.07,
         venmo_handle: p.venmo_handle,
       }));
 
