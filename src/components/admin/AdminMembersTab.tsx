@@ -21,6 +21,7 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Play, ChevronDown, ChevronRight, UserPlus, Mail } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { Fragment, useMemo, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Tables } from "@/integrations/supabase/types";
@@ -59,6 +60,19 @@ const AdminMembersTab = ({ profiles, runs, onRefresh }: AdminMembersTabProps) =>
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Status updated" });
+      onRefresh();
+    }
+  };
+
+  const updateVerified = async (profileId: string, value: boolean) => {
+    const { error } = await supabase
+      .from("profiles")
+      .update({ is_verified: value })
+      .eq("id", profileId);
+    if (error) {
+      toast({ title: "Couldn't update verification", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: value ? "Marked verified" : "Verification removed" });
       onRefresh();
     }
   };
@@ -244,10 +258,14 @@ const AdminMembersTab = ({ profiles, runs, onRefresh }: AdminMembersTabProps) =>
                   </TableCell>
                   <TableCell>{p.zip_code}</TableCell>
                   <TableCell>${Number(p.post_tax_monthly_income).toLocaleString()}</TableCell>
-                  <TableCell>
-                    <Badge variant={p.is_verified ? "default" : "secondary"}>
-                      {p.is_verified ? "Yes" : "No"}
-                    </Badge>
+                  <TableCell onClick={(e) => e.stopPropagation()}>
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={!!p.is_verified}
+                        onCheckedChange={(v) => updateVerified(p.id, v)}
+                      />
+                      <span className="text-xs text-muted-foreground">{p.is_verified ? "Yes" : "No"}</span>
+                    </div>
                   </TableCell>
                   <TableCell onClick={(e) => e.stopPropagation()}>
                     <Select
