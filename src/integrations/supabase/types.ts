@@ -98,6 +98,45 @@ export type Database = {
         }
         Relationships: []
       }
+      events: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          date: string
+          description: string | null
+          host_name: string
+          id: string
+          link: string | null
+          location: string
+          time: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          date: string
+          description?: string | null
+          host_name: string
+          id?: string
+          link?: string | null
+          location: string
+          time: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          date?: string
+          description?: string | null
+          host_name?: string
+          id?: string
+          link?: string | null
+          location?: string
+          time?: string
+          title?: string
+        }
+        Relationships: []
+      }
       profile_history: {
         Row: {
           changed_at: string
@@ -220,6 +259,36 @@ export type Database = {
           venmo_handle?: string | null
           zelle_info?: string | null
           zip_code?: string | null
+        }
+        Relationships: []
+      }
+      site_content: {
+        Row: {
+          body: string
+          id: string
+          section: string
+          sort_order: number
+          title: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          body: string
+          id?: string
+          section: string
+          sort_order?: number
+          title?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          body?: string
+          id?: string
+          section?: string
+          sort_order?: number
+          title?: string | null
+          updated_at?: string
+          updated_by?: string | null
         }
         Relationships: []
       }
