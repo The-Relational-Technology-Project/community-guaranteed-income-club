@@ -32,6 +32,41 @@ export type Database = {
         }
         Relationships: []
       }
+      board_posts: {
+        Row: {
+          author_id: string
+          body: string | null
+          created_at: string
+          id: string
+          title: string
+          type: Database["public"]["Enums"]["board_post_type"]
+        }
+        Insert: {
+          author_id: string
+          body?: string | null
+          created_at?: string
+          id?: string
+          title: string
+          type: Database["public"]["Enums"]["board_post_type"]
+        }
+        Update: {
+          author_id?: string
+          body?: string | null
+          created_at?: string
+          id?: string
+          title?: string
+          type?: Database["public"]["Enums"]["board_post_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "board_posts_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       calculation_runs: {
         Row: {
           average_income: number | null
@@ -427,6 +462,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "member"
+      board_post_type: "offer" | "need" | "lead"
       employment_status:
         | "employed"
         | "unemployed"
@@ -566,6 +602,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "member"],
+      board_post_type: ["offer", "need", "lead"],
       employment_status: [
         "employed",
         "unemployed",
