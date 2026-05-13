@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,9 +14,11 @@ const typeStyle = (t: MockBoardPost["type"]) =>
   t === "need" ? "bg-warm/15 text-warm" :
   "bg-accent/25 text-foreground";
 
+const examplePosts: MockBoardPost[] = mockBoardPosts.map((p) => ({ ...p, isExample: true } as any));
+
 const Board = () => {
   const { profile } = useAuth();
-  const [posts, setPosts] = useState<MockBoardPost[]>(mockBoardPosts);
+  const [posts, setPosts] = useState<MockBoardPost[]>(examplePosts);
   const [filter, setFilter] = useState<"all" | MockBoardPost["type"]>("all");
   const [type, setType] = useState<MockBoardPost["type"]>("offer");
   const [title, setTitle] = useState("");
@@ -47,7 +50,6 @@ const Board = () => {
         <p className="text-muted-foreground mt-2">
           Offers, needs, and job leads from members. Mutual aid beyond money.
         </p>
-        <Badge variant="secondary" className="mt-3 text-[10px] uppercase tracking-widest">demo data</Badge>
       </header>
 
       <Card className="mb-6">
@@ -90,15 +92,28 @@ const Board = () => {
 
       <div className="space-y-3">
         {visible.map((p) => (
-          <Card key={p.id}>
+          <Card key={p.id} className={(p as any).isExample ? "border-dashed" : ""}>
             <CardContent className="p-4 flex gap-3">
-              <Badge variant="secondary" className={`uppercase text-[10px] tracking-wider self-start ${typeStyle(p.type)}`}>
-                {p.type}
-              </Badge>
+              <div className="flex flex-col gap-1 items-start">
+                <Badge variant="secondary" className={`uppercase text-[10px] tracking-wider ${typeStyle(p.type)}`}>
+                  {p.type}
+                </Badge>
+                {(p as any).isExample && (
+                  <Badge variant="outline" className="text-[9px] tracking-wider text-muted-foreground">
+                    example
+                  </Badge>
+                )}
+              </div>
               <div className="flex-1">
                 <p className="font-medium">{p.title}</p>
                 {p.body && <p className="text-sm text-muted-foreground">{p.body}</p>}
-                <p className="text-xs text-muted-foreground mt-1">— {p.author}, {p.posted}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  —{" "}
+                  <Link to="/roster" className="text-primary hover:underline">
+                    {p.author}
+                  </Link>
+                  , {p.posted}
+                </p>
               </div>
             </CardContent>
           </Card>

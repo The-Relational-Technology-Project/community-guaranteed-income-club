@@ -8,8 +8,11 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
-import { mockEvents, mockBoardPosts, waysToShowUp } from "@/data/mockMember";
+import { mockBoardPosts, waysToShowUp } from "@/data/mockMember";
 import { Calendar, MessageSquare, Heart, ArrowRight, Coffee, MapPin, Check } from "lucide-react";
+import type { Tables } from "@/integrations/supabase/types";
+
+type EventRow = Tables<"events">;
 
 type TxnRow = {
   id: string;
@@ -31,6 +34,7 @@ const MemberHome = () => {
   const [networkCount, setNetworkCount] = useState(0);
   const [note, setNote] = useState("");
   const [loading, setLoading] = useState(true);
+  const [upcomingEvents, setUpcomingEvents] = useState<EventRow[]>([]);
 
   const firstName = profile?.name?.split(" ")[0] ?? "friend";
   const monthLabel = new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" });
@@ -76,6 +80,15 @@ const MemberHome = () => {
         if (t.receiver_id !== user.id) ids.add(t.receiver_id);
       });
       setNetworkCount(ids.size);
+
+      const { data: evts } = await supabase
+        .from("events")
+        .select("*")
+        .gte("date", new Date().toISOString().split("T")[0])
+        .order("date")
+        .limit(3);
+      setUpcomingEvents(evts ?? []);
+
       setLoading(false);
     };
     load();
@@ -207,26 +220,33 @@ const MemberHome = () => {
           <h2 className="text-xl font-serif">Upcoming gatherings</h2>
           <Link to="/events" className="text-sm text-primary hover:underline">All events →</Link>
         </div>
-        <div className="grid md:grid-cols-3 gap-4">
-          {mockEvents.map((e) => (
-            <Link key={e.id} to={`/events#${e.id}`} className="block">
-              <Card className="hover-pop h-full transition-shadow hover:shadow-md">
-                <CardContent className="p-5">
-                  <Calendar className="h-5 w-5 text-accent mb-2" />
-                  <p className="text-xs uppercase tracking-wider text-muted-foreground">{e.date} · {e.time}</p>
-                  <h3 className="font-serif text-lg mt-1 leading-tight">{e.title}</h3>
-                  <p className="flex items-center gap-1 text-sm text-muted-foreground mt-2">
-                    <MapPin className="h-3 w-3" /> {e.location}
-                  </p>
-                  <div className="flex items-center justify-between mt-2">
-                    <p className="text-xs text-muted-foreground">{e.attendees} going</p>
-                    <span className="text-xs font-medium text-primary">RSVP →</span>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
-        </div>
+        {upcomingEvents.length > 0 ? (
+          <div className="grid md:grid-cols-3 gap-4">
+            {upcomingEvents.map((e) => (
+              <Link key={e.id} to="/events" className="block">
+                <Card className="hover-pop h-full transition-shadow hover:shadow-md">
+                  <CardContent className="p-5">
+                    <Calendar className="h-5 w-5 text-accent mb-2" />
+                    <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                      {new Date(e.date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })} · {e.time}
+                    </p>
+                    <h3 className="font-serif text-lg mt-1 leading-tight">{e.title}</h3>
+                    <p className="flex items-center gap-1 text-sm text-muted-foreground mt-2">
+                      <MapPin className="h-3 w-3" /> {e.location}
+                    </p>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <Card className="border-dashed">
+            <CardContent className="p-6 text-center text-muted-foreground">
+              No upcoming gatherings yet.{" "}
+              <Link to="/events" className="text-primary hover:underline">Create one!</Link>
+            </CardContent>
+          </Card>
+        )}
       </section>
 
       {/* Ways to show up */}

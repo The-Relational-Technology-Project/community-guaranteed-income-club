@@ -4,23 +4,31 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Search, MapPin, Briefcase, CheckCircle2, Coffee } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Search, MapPin, Briefcase, CheckCircle2, Coffee, X } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 
 type RosterProfile = Pick<Tables<"profiles">, "id" | "name" | "bio" | "profession" | "employment_status" | "zip_code" | "photo_url" | "is_verified" | "participant_status"> & {
   favorite_third_space?: string | null;
+  open_to_in_person?: boolean | null;
+};
+
+const formatStatus = (s: string | null) => {
+  if (!s) return "";
+  return s.replace("_", " ").replace(/\b\w/g, (c) => c.toUpperCase());
 };
 
 const Roster = () => {
   const [profiles, setProfiles] = useState<RosterProfile[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState<RosterProfile | null>(null);
 
   useEffect(() => {
     const fetchProfiles = async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("id, name, bio, profession, employment_status, zip_code, photo_url, is_verified, participant_status, favorite_third_space")
+        .select("id, name, bio, profession, employment_status, zip_code, photo_url, is_verified, participant_status, favorite_third_space, open_to_in_person")
         .eq("participant_status", "active")
         .order("name");
       setProfiles(data ?? []);
@@ -35,11 +43,6 @@ const Roster = () => {
       (p.profession?.toLowerCase().includes(search.toLowerCase()) ?? false) ||
       (p.zip_code?.includes(search) ?? false)
   );
-
-  const formatStatus = (s: string | null) => {
-    if (!s) return "";
-    return s.replace("_", " ").replace(/\b\w/g, (c) => c.toUpperCase());
-  };
 
   if (loading) {
     return (
@@ -69,7 +72,11 @@ const Roster = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {filtered.map((profile) => (
-          <Card key={profile.id} className="overflow-hidden hover:shadow-md transition-shadow">
+          <Card
+            key={profile.id}
+            className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+            onClick={() => setSelected(profile)}
+          >
             <CardContent className="p-4 flex gap-4">
               <Avatar className="h-16 w-16 flex-shrink-0">
                 <AvatarImage src={profile.photo_url ?? undefined} />
@@ -96,10 +103,10 @@ const Roster = () => {
                     <span>{profile.zip_code}</span>
                   </div>
                 )}
-                {(profile as any).favorite_third_space && (
+                {profile.favorite_third_space && (
                   <div className="flex items-center gap-1 text-sm text-muted-foreground">
                     <Coffee className="h-3 w-3" />
-                    <span className="truncate">{(profile as any).favorite_third_space}</span>
+                    <span className="truncate">{profile.favorite_third_space}</span>
                   </div>
                 )}
                 {profile.bio && (
@@ -116,6 +123,63 @@ const Roster = () => {
           {search ? "No members match your search." : "No active members yet."}
         </div>
       )}
+
+      {/* Detail dialog */}
+      <Dialog open={!!selected} onOpenChange={(open) => { if (!open) setSelected(null); }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="sr-only">Member profile</DialogTitle>
+          </DialogHeader>
+          {selected && (
+            <div className="flex flex-col items-center text-center gap-4 py-2">
+              <Avatar className="h-24 w-24">
+                <AvatarImage src={selected.photo_url ?? undefined} />
+                <AvatarFallback className="bg-primary text-primary-foreground text-3xl">
+                  {selected.name.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <div className="flex items-center justify-center gap-2">
+                  <h2 className="text-2xl font-serif">{selected.name}</h2>
+                  {selected.is_verified && <CheckCircle2 className="h-5 w-5 text-primary" />}
+                </div>
+                <div className="flex flex-wrap justify-center gap-2 mt-2">
+                  {selected.profession && (
+                    <Badge variant="secondary" className="gap-1">
+                      <Briefcase className="h-3 w-3" /> {selected.profession}
+                    </Badge>
+                  )}
+                  {selected.employment_status && (
+                    <Badge variant="outline">{formatStatus(selected.employment_status)}</Badge>
+                  )}
+                </div>
+              </div>
+
+              {selected.bio && (
+                <p className="text-muted-foreground leading-relaxed max-w-sm">{selected.bio}</p>
+              )}
+
+              <div className="w-full space-y-2 text-sm text-left max-w-xs">
+                {selected.zip_code && (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <MapPin className="h-4 w-4 flex-shrink-0" />
+                    <span>ZIP {selected.zip_code}</span>
+                  </div>
+                )}
+                {selected.favorite_third_space && (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Coffee className="h-4 w-4 flex-shrink-0" />
+                    <span>{selected.favorite_third_space}</span>
+                  </div>
+                )}
+                {selected.open_to_in_person && (
+                  <Badge className="bg-fresh/15 text-fresh border-fresh/30">Open to meeting in person</Badge>
+                )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

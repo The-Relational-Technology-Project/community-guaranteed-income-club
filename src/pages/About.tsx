@@ -1,10 +1,30 @@
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { ClubMark } from "@/components/Wordmark";
 import { CHAPTER, ORG } from "@/lib/chapter";
+import { supabase } from "@/integrations/supabase/client";
+import type { Tables } from "@/integrations/supabase/types";
+
+type SiteContent = Tables<"site_content">;
 
 const About = () => {
+  const [faqItems, setFaqItems] = useState<SiteContent[]>([]);
+
+  useEffect(() => {
+    const load = async () => {
+      const { data } = await supabase
+        .from("site_content")
+        .select("*")
+        .eq("section", "faq")
+        .order("sort_order");
+      setFaqItems(data ?? []);
+    };
+    load();
+  }, []);
+
   return (
     <div className="container mx-auto px-4 py-12 max-w-3xl">
       <div className="text-center mb-12">
@@ -75,7 +95,7 @@ const About = () => {
               We host monthly gatherings — potlucks, skill shares, Sunday coffee.
               We have a board for offers and needs. We welcome new members in person.
             </p>
-            <p className="font-serif italic text-foreground">
+            <p className="font-serif italic text-foreground text-2xl pt-4">
               "All flourishing is mutual." — Robin Wall Kimmerer
             </p>
           </CardContent>
@@ -92,6 +112,26 @@ const About = () => {
             ))}
           </CardContent>
         </Card>
+
+        {faqItems.length > 0 && (
+          <Card>
+            <CardHeader><CardTitle className="font-serif">Frequently asked questions</CardTitle></CardHeader>
+            <CardContent>
+              <Accordion type="single" collapsible className="w-full">
+                {faqItems.map((item) => (
+                  <AccordionItem key={item.id} value={item.id}>
+                    <AccordionTrigger className="text-left font-medium">
+                      {item.title}
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground leading-relaxed">
+                      {item.body}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </CardContent>
+          </Card>
+        )}
 
         <div className="text-center pt-4">
           <Link to="/signup"><Button size="lg" className="rounded-full px-8">Join the Club</Button></Link>
