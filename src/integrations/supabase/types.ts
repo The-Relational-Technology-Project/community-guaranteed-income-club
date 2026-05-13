@@ -65,45 +65,6 @@ export type Database = {
         }
         Relationships: []
       }
-      events: {
-        Row: {
-          id: string
-          title: string
-          date: string
-          time: string
-          location: string
-          description: string | null
-          link: string | null
-          host_name: string
-          created_by: string | null
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          title: string
-          date: string
-          time: string
-          location: string
-          description?: string | null
-          link?: string | null
-          host_name: string
-          created_by?: string | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          title?: string
-          date?: string
-          time?: string
-          location?: string
-          description?: string | null
-          link?: string | null
-          host_name?: string
-          created_by?: string | null
-          created_at?: string
-        }
-        Relationships: []
-      }
       email_templates: {
         Row: {
           body_html: string
@@ -134,6 +95,45 @@ export type Database = {
           template_key?: string
           updated_at?: string
           updated_by?: string | null
+        }
+        Relationships: []
+      }
+      events: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          date: string
+          description: string | null
+          host_name: string
+          id: string
+          link: string | null
+          location: string
+          time: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          date: string
+          description?: string | null
+          host_name: string
+          id?: string
+          link?: string | null
+          location: string
+          time: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          date?: string
+          description?: string | null
+          host_name?: string
+          id?: string
+          link?: string | null
+          location?: string
+          time?: string
+          title?: string
         }
         Relationships: []
       }
@@ -264,29 +264,29 @@ export type Database = {
       }
       site_content: {
         Row: {
+          body: string
           id: string
           section: string
           sort_order: number
           title: string | null
-          body: string
           updated_at: string
           updated_by: string | null
         }
         Insert: {
+          body: string
           id?: string
           section: string
           sort_order?: number
           title?: string | null
-          body: string
           updated_at?: string
           updated_by?: string | null
         }
         Update: {
+          body?: string
           id?: string
           section?: string
           sort_order?: number
           title?: string | null
-          body?: string
           updated_at?: string
           updated_by?: string | null
         }
