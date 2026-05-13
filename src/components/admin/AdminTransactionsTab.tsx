@@ -20,13 +20,22 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "@/hooks/use-toast";
-import { ArrowRight, Download, MoreHorizontal } from "lucide-react";
+import { ArrowRight, Download, MoreHorizontal, Trash2 } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Profile = Tables<"profiles">;
@@ -44,6 +53,9 @@ const AdminTransactionsTab = ({ profiles, runs }: Props) => {
   const [runFilter, setRunFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
+
+  const [deleteTarget, setDeleteTarget] = useState<{ type: "single"; id: string; label: string } | { type: "bulk"; runId: string; label: string; count: number } | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const profileMap = useMemo(() => new Map(profiles.map((p) => [p.id, p])), [profiles]);
   const runMap = useMemo(() => new Map(runs.map((r) => [r.id, r])), [runs]);
@@ -93,6 +105,36 @@ const AdminTransactionsTab = ({ profiles, runs }: Props) => {
     }
   };
 
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+
+    let error;
+    if (deleteTarget.type === "single") {
+      ({ error } = await supabase.from("transactions").delete().eq("id", deleteTarget.id));
+    } else {
+      ({ error } = await supabase.from("transactions").delete().eq("run_id", deleteTarget.runId));
+    }
+
+    setDeleting(false);
+    setDeleteTarget(null);
+
+    if (error) {
+      toast({ title: "Delete failed", description: error.message, variant: "destructive" });
+    } else {
+      toast({
+        title: deleteTarget.type === "single" ? "Transaction deleted" : `${deleteTarget.count} transactions deleted`,
+      });
+      fetchTxns();
+    }
+  };
+
+  const runTxnCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    txns.forEach((t) => counts.set(t.run_id, (counts.get(t.run_id) ?? 0) + 1));
+    return counts;
+  }, [txns]);
+
   const exportCSV = () => {
     const rows = [
       ["Date", "Sender", "Receiver", "Amount", "Sender confirmed", "Receiver confirmed"],
@@ -128,9 +170,28 @@ const AdminTransactionsTab = ({ profiles, runs }: Props) => {
                 {filtered.length} of {txns.length} transactions
               </CardDescription>
             </div>
-            <Button variant="outline" size="sm" onClick={exportCSV} className="gap-1.5">
-              <Download className="h-3.5 w-3.5" /> CSV
-            </Button>
+            <div className="flex gap-2">
+              {runFilter !== "all" && (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => {
+                    const run = runMap.get(runFilter);
+                    const count = runTxnCounts.get(runFilter) ?? 0;
+                    const label = run
+                      ? new Date(run.run_date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
+                      : "this run";
+                    setDeleteTarget({ type: "bulk", runId: runFilter, label, count });
+                  }}
+                  className="gap-1.5"
+                >
+                  <Trash2 className="h-3.5 w-3.5" /> Delete run ({runTxnCounts.get(runFilter) ?? 0})
+                </Button>
+              )}
+              <Button variant="outline" size="sm" onClick={exportCSV} className="gap-1.5">
+                <Download className="h-3.5 w-3.5" /> CSV
+              </Button>
+            </div>
           </div>
 
           <div className="grid gap-2 pt-3 md:grid-cols-3">
@@ -145,7 +206,7 @@ const AdminTransactionsTab = ({ profiles, runs }: Props) => {
                 <SelectItem value="all">All runs</SelectItem>
                 {runs.map((r) => (
                   <SelectItem key={r.id} value={r.id}>
-                    {new Date(r.run_date).toLocaleDateString(undefined, { month: "short", year: "numeric" })}
+                    {new Date(r.run_date).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -187,7 +248,7 @@ const AdminTransactionsTab = ({ profiles, runs }: Props) => {
                     <TableRow key={t.id}>
                       <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
                         {run
-                          ? new Date(run.run_date).toLocaleDateString(undefined, { month: "short", year: "numeric" })
+                          ? new Date(run.run_date).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })
                           : new Date(t.created_at).toLocaleDateString()}
                       </TableCell>
                       <TableCell className="text-sm">{s?.name ?? "—"}</TableCell>
@@ -224,6 +285,22 @@ const AdminTransactionsTab = ({ profiles, runs }: Props) => {
                             >
                               Mark receiver confirmed
                             </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              className="text-destructive focus:text-destructive"
+                              onClick={() => {
+                                const senderName = s?.name ?? "unknown";
+                                const receiverName = r?.name ?? "unknown";
+                                setDeleteTarget({
+                                  type: "single",
+                                  id: t.id,
+                                  label: `${senderName} → ${receiverName} ($${Number(t.amount).toFixed(2)})`,
+                                });
+                              }}
+                            >
+                              <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+                              Delete transaction
+                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -242,6 +319,31 @@ const AdminTransactionsTab = ({ profiles, runs }: Props) => {
           )}
         </CardContent>
       </Card>
+
+      {/* Delete confirmation dialog */}
+      <Dialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Are you sure?</DialogTitle>
+            <DialogDescription>
+              {deleteTarget?.type === "single"
+                ? `This will permanently delete the transaction: ${deleteTarget.label}.`
+                : deleteTarget?.type === "bulk"
+                ? `This will permanently delete all ${deleteTarget.count} transactions from the ${deleteTarget.label} run.`
+                : ""}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={deleting}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting} className="gap-1.5">
+              <Trash2 className="h-4 w-4" />
+              {deleting ? "Deleting..." : "Yes, delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

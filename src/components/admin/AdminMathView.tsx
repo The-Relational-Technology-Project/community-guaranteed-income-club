@@ -71,6 +71,7 @@ const AdminMathView = ({ profiles, runs, onRefresh }: AdminMathViewProps) => {
   const now = new Date();
   const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const alreadyRanThisMonth = lastRunDate && lastRunDate >= currentMonthStart;
+  const runDateLabel = now.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 
   const runCalculation = async () => {
     setRunning(true);
@@ -132,7 +133,7 @@ const AdminMathView = ({ profiles, runs, onRefresh }: AdminMathViewProps) => {
       }
 
       const today = new Date();
-      const runDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-01`;
+      const runDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
       const { data: run, error: runError } = await supabase
         .from("calculation_runs")
@@ -178,7 +179,7 @@ const AdminMathView = ({ profiles, runs, onRefresh }: AdminMathViewProps) => {
             <p className="text-sm text-muted-foreground mt-1">
               {alreadyRanThisMonth
                 ? `Already ran for ${currentMonthStart.toLocaleDateString("en-US", { month: "long", year: "numeric" })}. Running again will create duplicate transactions.`
-                : `Ready to run for ${currentMonthStart.toLocaleDateString("en-US", { month: "long", year: "numeric" })}. This will create transactions for ${activeProfiles.length} active members.`}
+                : `Ready to run for ${runDateLabel}. This will create transactions for ${activeProfiles.length} active members.`}
             </p>
             {lastRun && (
               <p className="text-xs text-muted-foreground mt-1">
