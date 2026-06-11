@@ -22,9 +22,10 @@ CREATE POLICY "Admins can delete allowlist"
   TO authenticated
   USING (public.has_role(auth.uid(), 'admin'));
 
--- Seed Alex
+-- Seed the first admin. Replace with your chapter's lead steward email before
+-- deploying a fresh instance. (On the original deployment this row already exists.)
 INSERT INTO public.admin_allowlist (email, note)
-VALUES ('alexanderthezhu@gmail.com', 'Lead steward — Baltimore chapter')
+VALUES ('steward@example.com', 'Lead steward — first admin')
 ON CONFLICT (email) DO NOTHING;
 
 -- Trigger: on new auth user, if email is allowlisted, grant admin

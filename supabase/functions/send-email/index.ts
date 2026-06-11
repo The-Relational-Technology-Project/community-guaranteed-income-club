@@ -26,7 +26,10 @@ interface Payload {
   };
 }
 
-const ADMIN_NOTIFY_EMAIL = "alexanderthezhu@gmail.com";
+// Set ADMIN_NOTIFY_EMAIL in your Supabase Edge Function secrets to route
+// new-signup notifications to your chapter's steward(s).
+const ADMIN_NOTIFY_EMAIL =
+  Deno.env.get("ADMIN_NOTIFY_EMAIL") ?? "stewards@communityguaranteedincome.club";
 const SITE_URL = "https://communityguaranteedincome.club";
 
 Deno.serve(async (req) => {
