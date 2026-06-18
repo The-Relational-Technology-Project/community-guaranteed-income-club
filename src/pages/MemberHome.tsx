@@ -109,10 +109,10 @@ const MemberHome = () => {
         .is("archived_at", null)
         .order("created_at", { ascending: false })
         .limit(3);
-      const ids = Array.from(new Set((posts ?? []).map((p) => p.author_id)));
+      const authorIds = Array.from(new Set((posts ?? []).map((p) => p.author_id)));
       let nameMap = new Map<string, string>();
-      if (ids.length) {
-        const { data: profs } = await supabase.from("profiles").select("id, name").in("id", ids);
+      if (authorIds.length) {
+        const { data: profs } = await supabase.from("profiles").select("id, name").in("id", authorIds);
         nameMap = new Map((profs ?? []).map((p) => [p.id, p.name]));
       }
       setBoardPreview((posts ?? []).map((p: any) => ({ ...p, author_name: nameMap.get(p.author_id) ?? "Example" })));
