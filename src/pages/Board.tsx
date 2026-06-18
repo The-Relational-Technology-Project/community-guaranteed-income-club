@@ -78,8 +78,8 @@ const Board = () => {
     ]));
     let nameMap = new Map<string, string>();
     if (ids.length) {
-      const { data: profs } = await supabase.from("members_directory" as any).select("id, name").in("id", ids);
-      nameMap = new Map((profs ?? []).map((p) => [p.id, p.name]));
+      const { data: profs } = await (supabase as any).from("members_directory").select("id, name").in("id", ids);
+      nameMap = new Map(((profs ?? []) as Array<{ id: string; name: string }>).map((p) => [p.id, p.name]));
     }
     setPosts((data ?? []).map((p: any) => ({
       ...p,
@@ -90,12 +90,12 @@ const Board = () => {
   };
 
   const loadMembers = async () => {
-    const { data } = await supabase
-      .from("members_directory" as any)
+    const { data } = await (supabase as any)
+      .from("members_directory")
       .select("id, name")
       .eq("participant_status", "active")
       .order("name");
-    setMembers(data ?? []);
+    setMembers((data ?? []) as Array<{ id: string; name: string }>);
   };
 
   useEffect(() => {

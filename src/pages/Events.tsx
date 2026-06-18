@@ -52,8 +52,8 @@ const Events = () => {
     const userIds = Array.from(new Set((r ?? []).map((x) => x.user_id)));
     let nameMap = new Map<string, { name: string | null; photo_url: string | null }>();
     if (userIds.length) {
-      const { data: profs } = await supabase.from("members_directory" as any).select("id, name, photo_url").in("id", userIds);
-      nameMap = new Map((profs ?? []).map((p) => [p.id, { name: p.name, photo_url: p.photo_url }]));
+      const { data: profs } = await (supabase as any).from("members_directory").select("id, name, photo_url").in("id", userIds);
+      nameMap = new Map(((profs ?? []) as Array<{ id: string; name: string | null; photo_url: string | null }>).map((p) => [p.id, { name: p.name, photo_url: p.photo_url }]));
     }
     setRsvps((r ?? []).map((x) => ({ ...x, name: nameMap.get(x.user_id)?.name ?? null, photo_url: nameMap.get(x.user_id)?.photo_url ?? null })));
 

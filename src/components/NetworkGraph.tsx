@@ -35,13 +35,13 @@ export default function NetworkGraph() {
   useEffect(() => {
     (async () => {
       const [{ data: profs }, { data: txs }, { data: rsvps }, { data: posts }] = await Promise.all([
-        supabase.from("members_directory" as any).select("id").eq("participant_status", "active"),
+        (supabase as any).from("members_directory").select("id").eq("participant_status", "active"),
         supabase.from("transactions").select("sender_id, receiver_id"),
         supabase.from("event_rsvps").select("event_id, user_id"),
         supabase.from("board_posts").select("author_id, helped_by").not("helped_by", "is", null),
       ]);
 
-      const active = new Set((profs ?? []).map((p) => p.id));
+      const active = new Set(((profs ?? []) as Array<{ id: string }>).map((p) => p.id));
       const edgeMap = new Map<string, Link>();
       const addEdge = (a: string, b: string, kind: Link["kind"]) => {
         if (!a || !b || a === b) return;
