@@ -34,26 +34,38 @@ export type Database = {
       }
       board_posts: {
         Row: {
+          archived_at: string | null
+          archived_by: string | null
           author_id: string
           body: string | null
           created_at: string
+          helped_by: string | null
           id: string
+          is_example: boolean
           title: string
           type: Database["public"]["Enums"]["board_post_type"]
         }
         Insert: {
+          archived_at?: string | null
+          archived_by?: string | null
           author_id: string
           body?: string | null
           created_at?: string
+          helped_by?: string | null
           id?: string
+          is_example?: boolean
           title: string
           type: Database["public"]["Enums"]["board_post_type"]
         }
         Update: {
+          archived_at?: string | null
+          archived_by?: string | null
           author_id?: string
           body?: string | null
           created_at?: string
+          helped_by?: string | null
           id?: string
+          is_example?: boolean
           title?: string
           type?: Database["public"]["Enums"]["board_post_type"]
         }
@@ -61,6 +73,13 @@ export type Database = {
           {
             foreignKeyName: "board_posts_author_id_fkey"
             columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "board_posts_helped_by_fkey"
+            columns: ["helped_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -132,6 +151,35 @@ export type Database = {
           updated_by?: string | null
         }
         Relationships: []
+      }
+      event_rsvps: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_rsvps_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       events: {
         Row: {
@@ -213,6 +261,7 @@ export type Database = {
       profiles: {
         Row: {
           bio: string | null
+          contact_handle: string | null
           contact_method: string
           contact_notes: string | null
           created_at: string
@@ -232,6 +281,7 @@ export type Database = {
           phone: string | null
           photo_url: string | null
           post_tax_monthly_income: number | null
+          preferred_contact_method: string | null
           profession: string | null
           student_loan_payment: number | null
           updated_at: string
@@ -241,6 +291,7 @@ export type Database = {
         }
         Insert: {
           bio?: string | null
+          contact_handle?: string | null
           contact_method?: string
           contact_notes?: string | null
           created_at?: string
@@ -260,6 +311,7 @@ export type Database = {
           phone?: string | null
           photo_url?: string | null
           post_tax_monthly_income?: number | null
+          preferred_contact_method?: string | null
           profession?: string | null
           student_loan_payment?: number | null
           updated_at?: string
@@ -269,6 +321,7 @@ export type Database = {
         }
         Update: {
           bio?: string | null
+          contact_handle?: string | null
           contact_method?: string
           contact_notes?: string | null
           created_at?: string
@@ -288,6 +341,7 @@ export type Database = {
           phone?: string | null
           photo_url?: string | null
           post_tax_monthly_income?: number | null
+          preferred_contact_method?: string | null
           profession?: string | null
           student_loan_payment?: number | null
           updated_at?: string
@@ -459,6 +513,8 @@ export type Database = {
         }
         Returns: boolean
       }
+      promote_existing_admin: { Args: { _email: string }; Returns: boolean }
+      revoke_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "member"
