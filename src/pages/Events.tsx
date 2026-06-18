@@ -60,15 +60,6 @@ const Events = () => {
     setLoading(false);
   };
 
-  const _unused = async () => {
-    await supabase
-      .from("events")
-      .select("*")
-      .gte("date", new Date().toISOString().split("T")[0])
-      .order("date")
-      .order("time");
-  };
-
   useEffect(() => {
     fetchEvents();
   }, []);

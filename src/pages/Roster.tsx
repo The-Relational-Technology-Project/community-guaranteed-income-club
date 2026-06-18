@@ -1,16 +1,19 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Search, MapPin, Briefcase, CheckCircle2, Coffee, X } from "lucide-react";
+import { Search, MapPin, Briefcase, CheckCircle2, Coffee, MessageCircle } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 
 type RosterProfile = Pick<Tables<"profiles">, "id" | "name" | "bio" | "profession" | "employment_status" | "zip_code" | "photo_url" | "is_verified" | "participant_status"> & {
   favorite_third_space?: string | null;
   open_to_in_person?: boolean | null;
+  preferred_contact_method?: string | null;
+  contact_handle?: string | null;
 };
 
 const formatStatus = (s: string | null) => {
@@ -19,6 +22,7 @@ const formatStatus = (s: string | null) => {
 };
 
 const Roster = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [profiles, setProfiles] = useState<RosterProfile[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
@@ -28,14 +32,19 @@ const Roster = () => {
     const fetchProfiles = async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("id, name, bio, profession, employment_status, zip_code, photo_url, is_verified, participant_status, favorite_third_space, open_to_in_person")
+        .select("id, name, bio, profession, employment_status, zip_code, photo_url, is_verified, participant_status, favorite_third_space, open_to_in_person, preferred_contact_method, contact_handle")
         .eq("participant_status", "active")
         .order("name");
       setProfiles(data ?? []);
       setLoading(false);
+      const memberId = searchParams.get("member");
+      if (memberId) {
+        const match = (data ?? []).find((p) => p.id === memberId);
+        if (match) setSelected(match as RosterProfile);
+      }
     };
     fetchProfiles();
-  }, []);
+  }, [searchParams]);
 
   const filtered = profiles.filter(
     (p) =>
@@ -56,8 +65,8 @@ const Roster = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Community Roster</h1>
-          <p className="text-muted-foreground">{profiles.length} active members</p>
+          <h1 className="text-3xl font-bold">Our Club</h1>
+          <p className="text-muted-foreground">Club Directory · {profiles.length} active members</p>
         </div>
         <div className="relative w-full md:w-72">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -125,7 +134,15 @@ const Roster = () => {
       )}
 
       {/* Detail dialog */}
-      <Dialog open={!!selected} onOpenChange={(open) => { if (!open) setSelected(null); }}>
+      <Dialog open={!!selected} onOpenChange={(open) => {
+        if (!open) {
+          setSelected(null);
+          if (searchParams.get("member")) {
+            searchParams.delete("member");
+            setSearchParams(searchParams, { replace: true });
+          }
+        }
+      }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="sr-only">Member profile</DialogTitle>
@@ -174,6 +191,15 @@ const Roster = () => {
                 )}
                 {selected.open_to_in_person && (
                   <Badge className="bg-fresh/15 text-fresh border-fresh/30">Open to meeting in person</Badge>
+                )}
+                {selected.preferred_contact_method && (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <MessageCircle className="h-4 w-4 flex-shrink-0" />
+                    <span>
+                      Prefers <strong className="text-foreground">{selected.preferred_contact_method.replace("_", " ")}</strong>
+                      {selected.contact_handle ? <> · {selected.contact_handle}</> : null}
+                    </span>
+                  </div>
                 )}
               </div>
             </div>
