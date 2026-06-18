@@ -9,7 +9,7 @@ import { toast } from "@/hooks/use-toast";
 import { ShieldPlus, ShieldOff } from "lucide-react";
 
 type AdminRow = { user_id: string; name: string | null; email: string | null };
-type AllowRow = { id: string; email: string };
+type AllowRow = { email: string };
 
 const AdminAdminsTab = () => {
   const [admins, setAdmins] = useState<AdminRow[]>([]);
@@ -24,7 +24,7 @@ const AdminAdminsTab = () => {
       const { data: profs } = await supabase.from("profiles").select("id, name, email").in("id", ids);
       setAdmins((profs ?? []).map((p) => ({ user_id: p.id, name: p.name, email: p.email })));
     } else setAdmins([]);
-    const { data: allow } = await supabase.from("admin_allowlist").select("id, email").order("email");
+    const { data: allow } = await supabase.from("admin_allowlist").select("email").order("email");
     setAllowlist(allow ?? []);
   };
 
@@ -56,8 +56,8 @@ const AdminAdminsTab = () => {
     else { toast({ title: "Admin revoked" }); load(); }
   };
 
-  const removeAllowlist = async (id: string) => {
-    await supabase.from("admin_allowlist").delete().eq("id", id);
+  const removeAllowlist = async (email: string) => {
+    await supabase.from("admin_allowlist").delete().eq("email", email);
     load();
   };
 
@@ -109,9 +109,9 @@ const AdminAdminsTab = () => {
           {allowlist.length === 0 ? <p className="text-sm text-muted-foreground">No pending entries.</p> : (
             <ul className="space-y-2">
               {allowlist.map((a) => (
-                <li key={a.id} className="flex items-center justify-between text-sm">
+                <li key={a.email} className="flex items-center justify-between text-sm">
                   <span>{a.email}</span>
-                  <Button size="sm" variant="ghost" className="text-destructive" onClick={() => removeAllowlist(a.id)}>Remove</Button>
+                  <Button size="sm" variant="ghost" className="text-destructive" onClick={() => removeAllowlist(a.email)}>Remove</Button>
                 </li>
               ))}
             </ul>
