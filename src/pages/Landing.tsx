@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, Heart, Calendar, Check } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { ClubMark } from "@/components/Wordmark";
 import { CHAPTER, ORG } from "@/lib/chapter";
 
@@ -25,6 +26,28 @@ const Landing = () => {
   const [myIncome, setMyIncome] = useState("");
   const [studentLoans, setStudentLoans] = useState("");
   const [groupAvg, setGroupAvg] = useState("2800");
+  const [stats, setStats] = useState({ members: "50+", moved: "$21k+", gatherings: "12", completed: "100%" });
+
+  useEffect(() => {
+    const load = async () => {
+      const [{ count: memberCount }, { data: txns }, { count: eventCount }] = await Promise.all([
+        supabase.from("profiles").select("id", { count: "exact", head: true }).eq("participant_status", "active"),
+        supabase.from("transactions").select("amount, is_confirmed_sender"),
+        supabase.from("events").select("id", { count: "exact", head: true }),
+      ]);
+      const moved = 21000 + (txns ?? []).reduce((s, t) => s + Number(t.amount || 0), 0);
+      const total = (txns ?? []).length;
+      const confirmed = (txns ?? []).filter((t) => t.is_confirmed_sender).length;
+      const pct = total > 0 ? Math.round((confirmed / total) * 100) : 100;
+      setStats({
+        members: memberCount ? `${memberCount}+` : "50+",
+        moved: `$${Math.round(moved / 1000)}k+`,
+        gatherings: String(eventCount ?? 12),
+        completed: `${pct}%`,
+      });
+    };
+    load();
+  }, []);
 
   const myIncomeNum = Number(myIncome) || 0;
   const loansNum = Number(studentLoans) || 0;
@@ -93,10 +116,10 @@ const Landing = () => {
       <section className="bg-primary text-primary-foreground py-12">
         <div className="container mx-auto max-w-5xl px-4 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
           {[
-            ["50+", "members"],
-            ["$23k+", "moved between neighbors"],
-            ["12", "monthly gatherings"],
-            ["100%", "of payments completed"],
+            [stats.members, "members"],
+            [stats.moved, "moved between neighbors"],
+            [stats.gatherings, "gatherings"],
+            [stats.completed, "of payments completed"],
           ].map(([n, l]) => (
             <div key={l}>
               <p className="font-display font-bold text-4xl md:text-5xl text-pop">{n}</p>
@@ -225,6 +248,25 @@ const Landing = () => {
           </div>
           <p className="font-serif italic text-sm opacity-80 mt-8">
             "The currency is friendship." — what a member said at our last potluck.
+          </p>
+        </div>
+      </section>
+
+      {/* Donate */}
+      <section className="py-16 bg-background border-t-2 border-foreground/10">
+        <div className="container mx-auto max-w-2xl px-4 text-center">
+          <p className="text-xs uppercase tracking-[0.25em] text-accent mb-3 font-bold">Support the Club</p>
+          <h2 className="font-display font-bold text-3xl md:text-4xl tracking-tight">Chip in to keep this going.</h2>
+          <p className="text-muted-foreground mt-3">
+            We're a circle of neighbors, not a nonprofit. Donations help cover small chapter costs — food at gatherings, printing, the occasional emergency boost.
+          </p>
+          <a href="https://venmo.com/fuzzywonton" target="_blank" rel="noreferrer" className="inline-block mt-6">
+            <Button size="lg" className="rounded-full px-8 h-14 font-bold gap-2 bg-fresh text-fresh-foreground hover:bg-fresh/90">
+              <Heart className="h-4 w-4 fill-current" /> Donate via Venmo — @fuzzywonton
+            </Button>
+          </a>
+          <p className="text-xs text-muted-foreground mt-4 italic">
+            Not tax-deductible. Very much appreciated.
           </p>
         </div>
       </section>

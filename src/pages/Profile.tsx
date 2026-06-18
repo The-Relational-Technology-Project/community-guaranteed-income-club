@@ -32,6 +32,8 @@ const Profile = () => {
     bio: "",
     favorite_third_space: "",
     open_to_in_person: false,
+    preferred_contact_method: "",
+    contact_handle: "",
   });
 
   useEffect(() => {
@@ -49,6 +51,8 @@ const Profile = () => {
         bio: profile.bio ?? "",
         favorite_third_space: (profile as any).favorite_third_space ?? "",
         open_to_in_person: (profile as any).open_to_in_person ?? false,
+        preferred_contact_method: (profile as any).preferred_contact_method ?? "",
+        contact_handle: (profile as any).contact_handle ?? "",
       });
     }
   }, [profile]);
@@ -76,6 +80,8 @@ const Profile = () => {
         bio: form.bio || null,
         favorite_third_space: form.favorite_third_space || null,
         open_to_in_person: form.open_to_in_person,
+        preferred_contact_method: form.preferred_contact_method || null,
+        contact_handle: form.contact_handle || null,
       } as any)
       .eq("id", user.id);
 
@@ -231,6 +237,42 @@ const Profile = () => {
                 I'm open to exchanging money in person when possible 🤝
               </Label>
             </div>
+
+            <div className="pt-4 border-t">
+              <p className="text-sm font-semibold mb-1">Preferred contact</p>
+              <p className="text-xs text-muted-foreground mb-3">
+                Optional — shown to other Club members so they know how you'd like to be reached.
+              </p>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Method</Label>
+                  <Select
+                    value={form.preferred_contact_method || "none"}
+                    onValueChange={(v) => update("preferred_contact_method", v === "none" ? "" : v)}
+                  >
+                    <SelectTrigger><SelectValue placeholder="None" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">No preference</SelectItem>
+                      <SelectItem value="text">Text</SelectItem>
+                      <SelectItem value="call">Call</SelectItem>
+                      <SelectItem value="email">Email</SelectItem>
+                      <SelectItem value="signal">Signal</SelectItem>
+                      <SelectItem value="in_person">In person</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="contact_handle">Handle / number</Label>
+                  <Input
+                    id="contact_handle"
+                    value={form.contact_handle}
+                    onChange={(e) => update("contact_handle", e.target.value)}
+                    placeholder="e.g. signal: @me"
+                  />
+                </div>
+              </div>
+            </div>
+
             <Button type="submit" className="w-full" disabled={saving}>
               {saving ? "Saving..." : "Save Changes"}
             </Button>

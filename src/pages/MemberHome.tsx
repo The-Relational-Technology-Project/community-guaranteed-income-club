@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
-import { mockBoardPosts, waysToShowUp } from "@/data/mockMember";
+import { waysToShowUp } from "@/data/mockMember";
 import { Calendar, MessageSquare, Heart, ArrowRight, Coffee, MapPin, Check } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -27,14 +27,28 @@ type LastReceived = {
   sender: { name: string; photo_url: string | null } | null;
 };
 
+type LiveBoardPost = {
+  id: string;
+  type: "offer" | "need" | "lead";
+  title: string;
+  body: string | null;
+  is_example: boolean;
+  created_at: string;
+  author_id: string;
+  author_name?: string;
+};
+
 const MemberHome = () => {
   const { user, profile } = useAuth();
+  const navigate = useNavigate();
   const [thisMonth, setThisMonth] = useState<TxnRow | null>(null);
   const [lastMonth, setLastMonth] = useState<LastReceived | null>(null);
   const [networkCount, setNetworkCount] = useState(0);
   const [note, setNote] = useState("");
   const [loading, setLoading] = useState(true);
   const [upcomingEvents, setUpcomingEvents] = useState<EventRow[]>([]);
+  const [boardPreview, setBoardPreview] = useState<LiveBoardPost[]>([]);
+  const [sendingCheckIn, setSendingCheckIn] = useState(false);
 
   const firstName = profile?.name?.split(" ")[0] ?? "friend";
   const monthLabel = new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" });
@@ -89,9 +103,41 @@ const MemberHome = () => {
         .limit(3);
       setUpcomingEvents(evts ?? []);
 
+      const { data: posts } = await supabase
+        .from("board_posts")
+        .select("id, type, title, body, is_example, created_at, author_id")
+        .is("archived_at", null)
+        .order("created_at", { ascending: false })
+        .limit(3);
+      const authorIds = Array.from(new Set((posts ?? []).map((p) => p.author_id)));
+      let nameMap = new Map<string, string>();
+      if (authorIds.length) {
+        const { data: profs } = await supabase.from("profiles").select("id, name").in("id", authorIds);
+        nameMap = new Map((profs ?? []).map((p) => [p.id, p.name]));
+      }
+      setBoardPreview((posts ?? []).map((p: any) => ({ ...p, author_name: nameMap.get(p.author_id) ?? "Example" })));
+
       setLoading(false);
     };
     load();
+
+    // Realtime updates for the user's own transaction this month
+    const channel = supabase
+      .channel("memberhome-txns")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "transactions" },
+        () => load()
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "board_posts" },
+        () => load()
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user]);
 
   const confirmSend = async () => {
@@ -111,6 +157,40 @@ const MemberHome = () => {
   const venmoLink = thisMonth?.receiver?.venmo_handle
     ? `https://venmo.com/${thisMonth.receiver.venmo_handle.replace(/^@/, "")}?txn=pay&amount=${thisMonth.amount}&note=${encodeURIComponent(note || "Community Guaranteed Income Club")}`
     : null;
+
+  const handleWayToShowUp = async (id: string) => {
+    if (id === "welcome") {
+      // Open newest active member's profile via Roster query param
+      const { data } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("participant_status", "active")
+        .neq("id", user?.id ?? "")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      navigate(data ? `/roster?member=${data.id}` : "/roster");
+    } else if (id === "learn") {
+      navigate("/events?new=1");
+    } else if (id === "task") {
+      navigate("/board?filter=need");
+    } else if (id === "support") {
+      setSendingCheckIn(true);
+      const { error } = await supabase.functions.invoke("send-email", {
+        body: {
+          kind: "check_in_intent",
+          memberName: profile?.name,
+          memberEmail: profile?.email,
+        },
+      });
+      setSendingCheckIn(false);
+      if (error) {
+        toast({ title: "Couldn't send", description: error.message, variant: "destructive" });
+      } else {
+        toast({ title: "Sent 💛", description: "Alex will reach out about pairing you with a neighbor." });
+      }
+    }
+  };
 
   return (
     <div className="max-w-4xl mx-auto px-4 md:px-8 py-8 md:py-12 space-y-10">
@@ -265,9 +345,11 @@ const MemberHome = () => {
                   variant="ghost"
                   size="sm"
                   className="mt-3 -ml-3 text-primary"
-                  onClick={() => toast({ title: w.cta, description: "We'll connect you — thank you for showing up." })}
+                  disabled={w.id === "support" && sendingCheckIn}
+                  onClick={() => handleWayToShowUp(w.id)}
                 >
-                  {w.cta} <ArrowRight className="h-3.5 w-3.5 ml-1" />
+                  {w.id === "support" && sendingCheckIn ? "Sending…" : w.cta}{" "}
+                  <ArrowRight className="h-3.5 w-3.5 ml-1" />
                 </Button>
               </CardContent>
             </Card>
@@ -282,23 +364,40 @@ const MemberHome = () => {
           <Link to="/board" className="text-sm text-primary hover:underline">Full board →</Link>
         </div>
         <div className="space-y-3">
-          {mockBoardPosts.slice(0, 3).map((p) => (
+          {boardPreview.length === 0 && (
+            <Card className="border-dashed">
+              <CardContent className="p-5 text-sm text-muted-foreground">
+                Nothing on the board yet. <Link to="/board" className="text-primary hover:underline">Post the first one.</Link>
+              </CardContent>
+            </Card>
+          )}
+          {boardPreview.map((p) => (
             <Card key={p.id}>
               <CardContent className="p-4 flex gap-3">
-                <Badge
-                  variant="secondary"
-                  className={`uppercase text-[10px] tracking-wider self-start ${
-                    p.type === "offer" ? "bg-success/15 text-success" :
-                    p.type === "need" ? "bg-warm/15 text-warm" :
-                    "bg-accent/20 text-accent-foreground"
-                  }`}
-                >
-                  {p.type}
-                </Badge>
+                <div className="flex flex-col gap-1 items-start">
+                  <Badge
+                    variant="secondary"
+                    className={`uppercase text-[10px] tracking-wider ${
+                      p.type === "offer" ? "bg-success/15 text-success" :
+                      p.type === "need" ? "bg-warm/15 text-warm" :
+                      "bg-accent/20 text-accent-foreground"
+                    }`}
+                  >
+                    {p.type}
+                  </Badge>
+                  {p.is_example && (
+                    <Badge variant="outline" className="text-[9px] uppercase tracking-wider">Example</Badge>
+                  )}
+                </div>
                 <div className="flex-1">
                   <p className="font-medium">{p.title}</p>
-                  <p className="text-sm text-muted-foreground">{p.body}</p>
-                  <p className="text-xs text-muted-foreground mt-1">— {p.author}, {p.posted}</p>
+                  {p.body && <p className="text-sm text-muted-foreground">{p.body}</p>}
+                  <p className="text-xs text-muted-foreground mt-1">
+                    —{" "}
+                    <Link to={`/roster?member=${p.author_id}`} className="text-primary hover:underline">
+                      {p.author_name}
+                    </Link>
+                  </p>
                 </div>
               </CardContent>
             </Card>
