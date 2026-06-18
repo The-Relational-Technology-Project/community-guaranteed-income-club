@@ -74,7 +74,21 @@ export type Database = {
             foreignKeyName: "board_posts_author_id_fkey"
             columns: ["author_id"]
             isOneToOne: false
+            referencedRelation: "members_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "board_posts_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "board_posts_helped_by_fkey"
+            columns: ["helped_by"]
+            isOneToOne: false
+            referencedRelation: "members_directory"
             referencedColumns: ["id"]
           },
           {
@@ -249,6 +263,13 @@ export type Database = {
           profile_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "profile_history_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "members_directory"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "profile_history_profile_id_fkey"
             columns: ["profile_id"]
@@ -432,6 +453,13 @@ export type Database = {
             foreignKeyName: "transactions_receiver_id_fkey"
             columns: ["receiver_id"]
             isOneToOne: false
+            referencedRelation: "members_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_receiver_id_fkey"
+            columns: ["receiver_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -440,6 +468,13 @@ export type Database = {
             columns: ["run_id"]
             isOneToOne: false
             referencedRelation: "calculation_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "members_directory"
             referencedColumns: ["id"]
           },
           {
@@ -496,6 +531,13 @@ export type Database = {
             foreignKeyName: "waitlist_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: false
+            referencedRelation: "members_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "waitlist_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -503,7 +545,72 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      members_directory: {
+        Row: {
+          bio: string | null
+          contact_handle: string | null
+          created_at: string | null
+          employment_status:
+            | Database["public"]["Enums"]["employment_status"]
+            | null
+          favorite_third_space: string | null
+          id: string | null
+          is_verified: boolean | null
+          name: string | null
+          open_to_in_person: boolean | null
+          participant_status:
+            | Database["public"]["Enums"]["participant_status"]
+            | null
+          photo_url: string | null
+          preferred_contact_method: string | null
+          profession: string | null
+          venmo_handle: string | null
+          zip_code: string | null
+        }
+        Insert: {
+          bio?: string | null
+          contact_handle?: string | null
+          created_at?: string | null
+          employment_status?:
+            | Database["public"]["Enums"]["employment_status"]
+            | null
+          favorite_third_space?: string | null
+          id?: string | null
+          is_verified?: boolean | null
+          name?: string | null
+          open_to_in_person?: boolean | null
+          participant_status?:
+            | Database["public"]["Enums"]["participant_status"]
+            | null
+          photo_url?: string | null
+          preferred_contact_method?: string | null
+          profession?: string | null
+          venmo_handle?: string | null
+          zip_code?: string | null
+        }
+        Update: {
+          bio?: string | null
+          contact_handle?: string | null
+          created_at?: string | null
+          employment_status?:
+            | Database["public"]["Enums"]["employment_status"]
+            | null
+          favorite_third_space?: string | null
+          id?: string | null
+          is_verified?: boolean | null
+          name?: string | null
+          open_to_in_person?: boolean | null
+          participant_status?:
+            | Database["public"]["Enums"]["participant_status"]
+            | null
+          photo_url?: string | null
+          preferred_contact_method?: string | null
+          profession?: string | null
+          venmo_handle?: string | null
+          zip_code?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
