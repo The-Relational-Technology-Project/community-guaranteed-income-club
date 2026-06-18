@@ -22,9 +22,9 @@ const MemberLayout = ({ children }: { children: React.ReactNode }) => {
 
   const links = [
     { to: "/home", label: "Home", icon: Home },
-    { to: "/roster", label: "Roster", icon: Users },
+    { to: "/roster", label: "Club Directory", icon: Users },
     { to: "/card", label: "Card", icon: CreditCard },
-    { to: "/events", label: "Events", icon: Calendar },
+    { to: "/events", label: "Gatherings", icon: Calendar },
     { to: "/board", label: "Board", icon: MessageSquare },
   ];
   const mobileLinks = isAdmin

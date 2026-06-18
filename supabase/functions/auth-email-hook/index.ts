@@ -57,14 +57,14 @@ function render(p: AuthHookPayload): { subject: string; html: string } {
   }
   if (action === "magiclink" || action === "login") {
     return {
-      subject: "Your sign-in link",
+      subject: "Your Club sign-in link",
       html: brandedEmail({
-        preheader: "Tap to sign in. Good for one hour.",
-        heading: `Sign in, ${firstName}`,
-        bodyHtml: `<p>Here's your one-time sign-in link. It's good for one hour.</p>`,
-        ctaLabel: "Sign in",
+        preheader: "One tap and you're in. Good for an hour.",
+        heading: `Welcome back, ${firstName} 💛`,
+        bodyHtml: `<p>Tap below to sign in to the Club. The link's good for an hour.</p><p>While you're in there — peek at the gatherings, say hi on the board, or just see who showed up for who this month.</p>`,
+        ctaLabel: "Sign me in",
         ctaUrl: url,
-        footerNote: "If you didn't request this, you can safely ignore it.",
+        footerNote: "Didn't ask for this? You can safely ignore it. See you soon at a potluck.",
       }),
     };
   }
