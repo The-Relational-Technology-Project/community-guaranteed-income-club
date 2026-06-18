@@ -112,7 +112,7 @@ const MemberHome = () => {
       const authorIds = Array.from(new Set((posts ?? []).map((p) => p.author_id)));
       let nameMap = new Map<string, string>();
       if (authorIds.length) {
-        const { data: profs } = await supabase.from("profiles").select("id, name").in("id", authorIds);
+        const { data: profs } = await supabase.from("members_directory" as any).select("id, name").in("id", authorIds);
         nameMap = new Map((profs ?? []).map((p) => [p.id, p.name]));
       }
       setBoardPreview((posts ?? []).map((p: any) => ({ ...p, author_name: nameMap.get(p.author_id) ?? "Example" })));
@@ -162,7 +162,7 @@ const MemberHome = () => {
     if (id === "welcome") {
       // Open newest active member's profile via Roster query param
       const { data } = await supabase
-        .from("profiles")
+        .from("members_directory" as any)
         .select("id")
         .eq("participant_status", "active")
         .neq("id", user?.id ?? "")

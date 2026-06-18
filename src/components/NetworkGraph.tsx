@@ -35,7 +35,7 @@ export default function NetworkGraph() {
   useEffect(() => {
     (async () => {
       const [{ data: profs }, { data: txs }, { data: rsvps }, { data: posts }] = await Promise.all([
-        supabase.from("profiles").select("id").eq("participant_status", "active"),
+        supabase.from("members_directory" as any).select("id").eq("participant_status", "active"),
         supabase.from("transactions").select("sender_id, receiver_id"),
         supabase.from("event_rsvps").select("event_id, user_id"),
         supabase.from("board_posts").select("author_id, helped_by").not("helped_by", "is", null),

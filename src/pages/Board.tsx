@@ -78,7 +78,7 @@ const Board = () => {
     ]));
     let nameMap = new Map<string, string>();
     if (ids.length) {
-      const { data: profs } = await supabase.from("profiles").select("id, name").in("id", ids);
+      const { data: profs } = await supabase.from("members_directory" as any).select("id, name").in("id", ids);
       nameMap = new Map((profs ?? []).map((p) => [p.id, p.name]));
     }
     setPosts((data ?? []).map((p: any) => ({
@@ -91,7 +91,7 @@ const Board = () => {
 
   const loadMembers = async () => {
     const { data } = await supabase
-      .from("profiles")
+      .from("members_directory" as any)
       .select("id, name")
       .eq("participant_status", "active")
       .order("name");
