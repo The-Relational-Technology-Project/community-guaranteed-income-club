@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BarChart3, Users, Calculator, Mail, ArrowLeftRight, FileText } from "lucide-react";
+import { BarChart3, Users, Calculator, Mail, ArrowLeftRight, FileText, Shield } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import AdminKPIDashboard from "@/components/admin/AdminKPIDashboard";
 import AdminMembersTab from "@/components/admin/AdminMembersTab";
@@ -9,6 +9,7 @@ import AdminMathView from "@/components/admin/AdminMathView";
 import AdminEmailsTab from "@/components/admin/AdminEmailsTab";
 import AdminTransactionsTab from "@/components/admin/AdminTransactionsTab";
 import AdminContentTab from "@/components/admin/AdminContentTab";
+import AdminAdminsTab from "@/components/admin/AdminAdminsTab";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Profile = Tables<"profiles">;
@@ -76,7 +77,7 @@ const AdminDashboard = () => {
       </Card>
 
       <Tabs defaultValue="kpi" className="space-y-6">
-        <TabsList className="grid h-auto w-full max-w-3xl grid-cols-3 gap-2 rounded-lg bg-transparent p-0 md:grid-cols-6">
+        <TabsList className="grid h-auto w-full max-w-4xl grid-cols-3 gap-2 rounded-lg bg-transparent p-0 md:grid-cols-7">
           <TabsTrigger value="kpi" className="gap-1.5">
             <BarChart3 className="h-4 w-4" />
             <span className="hidden sm:inline">KPIs</span>
@@ -100,6 +101,10 @@ const AdminDashboard = () => {
           <TabsTrigger value="content" className="gap-1.5">
             <FileText className="h-4 w-4" />
             <span className="hidden sm:inline">Content</span>
+          </TabsTrigger>
+          <TabsTrigger value="admins" className="gap-1.5">
+            <Shield className="h-4 w-4" />
+            <span className="hidden sm:inline">Admins</span>
           </TabsTrigger>
         </TabsList>
 
@@ -125,6 +130,10 @@ const AdminDashboard = () => {
 
         <TabsContent value="content">
           <AdminContentTab />
+        </TabsContent>
+
+        <TabsContent value="admins">
+          <AdminAdminsTab />
         </TabsContent>
       </Tabs>
     </div>
