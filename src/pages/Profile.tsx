@@ -32,6 +32,8 @@ const Profile = () => {
     bio: "",
     favorite_third_space: "",
     open_to_in_person: false,
+    preferred_contact_method: "",
+    contact_handle: "",
   });
 
   useEffect(() => {
@@ -49,6 +51,8 @@ const Profile = () => {
         bio: profile.bio ?? "",
         favorite_third_space: (profile as any).favorite_third_space ?? "",
         open_to_in_person: (profile as any).open_to_in_person ?? false,
+        preferred_contact_method: (profile as any).preferred_contact_method ?? "",
+        contact_handle: (profile as any).contact_handle ?? "",
       });
     }
   }, [profile]);
@@ -76,6 +80,8 @@ const Profile = () => {
         bio: form.bio || null,
         favorite_third_space: form.favorite_third_space || null,
         open_to_in_person: form.open_to_in_person,
+        preferred_contact_method: form.preferred_contact_method || null,
+        contact_handle: form.contact_handle || null,
       } as any)
       .eq("id", user.id);
 
