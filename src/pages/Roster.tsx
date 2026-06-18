@@ -32,16 +32,16 @@ const Roster = () => {
 
   useEffect(() => {
     const fetchProfiles = async () => {
-      const { data } = await supabase
-        .from("profiles")
+      const { data } = await (supabase as any)
+        .from("members_directory")
         .select("id, name, bio, profession, employment_status, zip_code, photo_url, is_verified, participant_status, favorite_third_space, open_to_in_person, preferred_contact_method, contact_handle")
         .eq("participant_status", "active")
         .order("name");
-      setProfiles(data ?? []);
+      setProfiles((data ?? []) as RosterProfile[]);
       setLoading(false);
       const memberId = searchParams.get("member");
       if (memberId) {
-        const match = (data ?? []).find((p) => p.id === memberId);
+        const match = ((data ?? []) as RosterProfile[]).find((p) => p.id === memberId);
         if (match) setSelected(match as RosterProfile);
       }
     };
