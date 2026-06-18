@@ -6,7 +6,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Search, MapPin, Briefcase, CheckCircle2, Coffee, MessageCircle } from "lucide-react";
+import { Search, MapPin, Briefcase, CheckCircle2, Coffee, MessageCircle, Users, Network } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import NetworkGraph from "@/components/NetworkGraph";
 import type { Tables } from "@/integrations/supabase/types";
 
 type RosterProfile = Pick<Tables<"profiles">, "id" | "name" | "bio" | "profession" | "employment_status" | "zip_code" | "photo_url" | "is_verified" | "participant_status"> & {
@@ -63,23 +65,32 @@ const Roster = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
         <div>
           <h1 className="text-3xl font-bold">Our Club</h1>
-          <p className="text-muted-foreground">Club Directory · {profiles.length} active members</p>
-        </div>
-        <div className="relative w-full md:w-72">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search by name, profession, ZIP..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9"
-          />
+          <p className="text-muted-foreground">{profiles.length} active members</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <Tabs defaultValue="directory" className="space-y-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <TabsList>
+            <TabsTrigger value="directory" className="gap-1.5"><Users className="h-4 w-4" /> Directory</TabsTrigger>
+            <TabsTrigger value="network" className="gap-1.5"><Network className="h-4 w-4" /> Network</TabsTrigger>
+          </TabsList>
+          <div className="relative w-full md:w-72">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search by name, profession, ZIP..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+        </div>
+
+        <TabsContent value="directory">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {filtered.map((profile) => (
           <Card
             key={profile.id}
@@ -125,13 +136,19 @@ const Roster = () => {
             </CardContent>
           </Card>
         ))}
-      </div>
+          </div>
 
-      {filtered.length === 0 && (
-        <div className="text-center py-12 text-muted-foreground">
-          {search ? "No members match your search." : "No active members yet."}
-        </div>
-      )}
+          {filtered.length === 0 && (
+            <div className="text-center py-12 text-muted-foreground">
+              {search ? "No members match your search." : "No active members yet."}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="network">
+          <NetworkGraph />
+        </TabsContent>
+      </Tabs>
 
       {/* Detail dialog */}
       <Dialog open={!!selected} onOpenChange={(open) => {
