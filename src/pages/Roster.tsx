@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Search, MapPin, Briefcase, CheckCircle2, Coffee, MessageCircle, Users, Network, Star, Sparkles, MessageSquare, Calendar } from "lucide-react";
+import { Search, MapPin, Briefcase, CheckCircle2, Coffee, MessageCircle, Users, Network, Star, Sparkles } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import NetworkGraph from "@/components/NetworkGraph";
 import type { Tables } from "@/integrations/supabase/types";
