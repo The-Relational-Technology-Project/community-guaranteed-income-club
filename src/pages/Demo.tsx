@@ -7,9 +7,9 @@ import { toast } from "@/hooks/use-toast";
 
 const Demo = () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState<"maya" | "steward" | null>(null);
+  const [loading, setLoading] = useState<"maya" | null>(null);
 
-  const signIn = async (email: string, dest: string, who: "maya" | "steward") => {
+  const signIn = async (email: string, dest: string, who: "maya") => {
     setLoading(who);
     const { error } = await supabase.auth.signInWithPassword({ email, password: "test1234" });
     setLoading(null);
@@ -26,7 +26,7 @@ const Demo = () => {
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-serif">Take a live tour</CardTitle>
           <CardDescription>
-            Step into the Club as one of two pre-made accounts. The rest of the app
+            Step into the Club as a pre-made member account. The rest of the app
             is reserved for real members.
           </CardDescription>
         </CardHeader>
@@ -38,16 +38,8 @@ const Demo = () => {
           >
             {loading === "maya" ? "Signing in…" : "✨ Enter as Maya (member)"}
           </Button>
-          <Button
-            variant="outline"
-            className="w-full rounded-full h-12 border-primary/30"
-            onClick={() => signIn("admin@test.com", "/admin", "steward")}
-            disabled={loading !== null}
-          >
-            {loading === "steward" ? "Signing in…" : "🛡 Enter as the Steward (admin)"}
-          </Button>
           <p className="text-xs text-muted-foreground text-center pt-2">
-            These are demo accounts. Real members sign in by magic link from the
+            This is a demo account. Real members sign in by magic link from the
             Sign in page.
           </p>
         </CardContent>
