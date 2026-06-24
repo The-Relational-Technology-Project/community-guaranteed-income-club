@@ -169,14 +169,25 @@ const Profile = () => {
                 <Input id="phone" type="tel" value={form.phone} onChange={(e) => update("phone", e.target.value)} />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="venmo">Venmo Handle</Label>
-                <Input id="venmo" value={form.venmo_handle} onChange={(e) => update("venmo_handle", e.target.value)} placeholder="@username" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="zelle">Zelle Info</Label>
-                <Input id="zelle" value={form.zelle_info} onChange={(e) => update("zelle_info", e.target.value)} />
+            <div className="space-y-2">
+              <Label>Payment method *</Label>
+              <p className="text-xs text-muted-foreground">Please provide one — Venmo is the default.</p>
+              <div className="grid grid-cols-3 gap-2">
+                <Select value={form.payment_method} onValueChange={(v) => update("payment_method", v)}>
+                  <SelectTrigger className="col-span-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="venmo">Venmo</SelectItem>
+                    <SelectItem value="zelle">Zelle</SelectItem>
+                    <SelectItem value="cashapp">CashApp</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Input
+                  className="col-span-2"
+                  value={form.payment_handle}
+                  onChange={(e) => update("payment_handle", e.target.value)}
+                  placeholder={form.payment_method === "venmo" ? "@your-handle" : form.payment_method === "zelle" ? "email or phone" : form.payment_method === "cashapp" ? "$cashtag" : "handle / instructions"}
+                />
               </div>
             </div>
             <div className="space-y-2">
