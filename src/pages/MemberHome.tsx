@@ -225,6 +225,7 @@ const MemberHome = () => {
   };
 
   return (
+    <>
     <div className="max-w-4xl mx-auto px-4 md:px-8 py-8 md:py-12 space-y-10">
       {/* Greeting */}
       <header>
