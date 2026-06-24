@@ -6,6 +6,14 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const esc = (s: unknown): string =>
+  String(s ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+
 interface Payload {
   kind: "welcome_approval" | "new_signup_admin" | "custom" | "check_in_intent";
   to?: string;
@@ -42,6 +50,30 @@ Deno.serve(async (req) => {
 
   try {
     const payload = (await req.json()) as Payload;
+
+    // The signup flow can fire `new_signup_admin` before a session exists
+    // (magic-link signup). That kind has a fixed admin recipient and escaped
+    // content, so it is the only path allowed unauthenticated. Every other
+    // kind requires a verified user, and `custom` additionally requires admin.
+    let callerId: string | null = null;
+    const authHeader = req.headers.get("Authorization");
+    if (authHeader?.startsWith("Bearer ")) {
+      const authClient = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_ANON_KEY")!,
+        { global: { headers: { Authorization: authHeader } } }
+      );
+      const token = authHeader.replace("Bearer ", "");
+      const { data: claimsData } = await authClient.auth.getClaims(token);
+      callerId = (claimsData?.claims?.sub as string | undefined) ?? null;
+    }
+    if (payload.kind !== "new_signup_admin" && !callerId) {
+      return new Response(JSON.stringify({ ok: false, error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
@@ -89,14 +121,14 @@ Deno.serve(async (req) => {
       const m = payload.newMember;
       if (!m) throw new Error("newMember required");
       const html = brandedEmail({
-        preheader: `New signup: ${m.name}`,
+        preheader: `New signup: ${esc(m.name)}`,
         heading: `New signup to review`,
         bodyHtml: `
-          <p><strong>${m.name}</strong> just joined and is awaiting your review.</p>
+          <p><strong>${esc(m.name)}</strong> just joined and is awaiting your review.</p>
           <table cellpadding="6" style="font-size:14px;border-collapse:collapse;margin:12px 0;">
-            <tr><td style="color:#64748b;">Email</td><td>${m.email}</td></tr>
-            ${m.zip_code ? `<tr><td style="color:#64748b;">ZIP</td><td>${m.zip_code}</td></tr>` : ""}
-            ${m.profession ? `<tr><td style="color:#64748b;">Profession</td><td>${m.profession}</td></tr>` : ""}
+            <tr><td style="color:#64748b;">Email</td><td>${esc(m.email)}</td></tr>
+            ${m.zip_code ? `<tr><td style="color:#64748b;">ZIP</td><td>${esc(m.zip_code)}</td></tr>` : ""}
+            ${m.profession ? `<tr><td style="color:#64748b;">Profession</td><td>${esc(m.profession)}</td></tr>` : ""}
           </table>
           <p>Open the admin dashboard to verify, set a status, and send the welcome email when ready.</p>
         `,
@@ -105,7 +137,7 @@ Deno.serve(async (req) => {
       });
       const result = await sendEmail({
         to: ADMIN_NOTIFY_EMAIL,
-        subject: `New signup: ${m.name}`,
+        subject: `New signup: ${m.name}`.replace(/[\r\n]+/g, " "),
         html,
       });
       return new Response(JSON.stringify({ ok: true, id: result.id }), {
@@ -114,21 +146,22 @@ Deno.serve(async (req) => {
     }
 
     if (payload.kind === "check_in_intent") {
-      const name = payload.memberName ?? "A member";
-      const matched = payload.matchedName ? `<p><strong>Matched with:</strong> ${payload.matchedName}</p>` : "";
+      const rawName = payload.memberName ?? "A member";
+      const name = esc(rawName);
+      const matched = payload.matchedName ? `<p><strong>Matched with:</strong> ${esc(payload.matchedName)}</p>` : "";
       const noteHtml = payload.note
-        ? `<p style="border-left:3px solid #1d4ed8;padding:8px 12px;background:#f1f5f9;">${payload.note.replace(/</g, "&lt;")}</p>`
+        ? `<p style="border-left:3px solid #1d4ed8;padding:8px 12px;background:#f1f5f9;">${esc(payload.note)}</p>`
         : "";
       const html = brandedEmail({
         preheader: `${name} wants to check in on a neighbor`,
         heading: "Check-in intent",
-        bodyHtml: `<p><strong>${name}</strong> (${payload.memberEmail ?? "no email on file"}) tapped "Check in on a neighbor" on their member home.</p>${matched}${noteHtml}<p>The match was made automatically and logged in the admin dashboard.</p>`,
+        bodyHtml: `<p><strong>${name}</strong> (${esc(payload.memberEmail ?? "no email on file")}) tapped "Check in on a neighbor" on their member home.</p>${matched}${noteHtml}<p>The match was made automatically and logged in the admin dashboard.</p>`,
         ctaLabel: "Open admin dashboard",
         ctaUrl: `${SITE_URL}/admin`,
       });
       const result = await sendEmail({
         to: ADMIN_NOTIFY_EMAIL,
-        subject: `Check-in intent from ${name}`,
+        subject: `Check-in intent from ${rawName}`.replace(/[\r\n]+/g, " "),
         html,
         replyTo: payload.memberEmail || undefined,
       });
@@ -140,6 +173,19 @@ Deno.serve(async (req) => {
     if (payload.kind === "custom") {
       if (!payload.to || !payload.subject || !payload.heading || !payload.bodyHtml) {
         throw new Error("custom requires to, subject, heading, bodyHtml");
+      }
+      // Free-form recipient + HTML body is admin-only.
+      const { data: roleRow } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", callerId!)
+        .eq("role", "admin")
+        .maybeSingle();
+      if (!roleRow) {
+        return new Response(JSON.stringify({ ok: false, error: "Forbidden" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
       const html = brandedEmail({
         heading: payload.heading,

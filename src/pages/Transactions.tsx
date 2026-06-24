@@ -61,9 +61,9 @@ const Transactions = () => {
     }
 
     const profileIds = [...new Set(txns.flatMap((t) => [t.sender_id, t.receiver_id]))];
-    const { data: profiles } = await supabase
-      .from("profiles")
-      .select("*, favorite_third_space, open_to_in_person")
+    const { data: profiles } = await (supabase as any)
+      .from("members_directory")
+      .select("id, name, photo_url, bio, venmo_handle, favorite_third_space, zip_code")
       .in("id", profileIds);
 
     const profileMap = new Map((profiles ?? []).map((p: any) => [p.id, p]));

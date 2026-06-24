@@ -109,16 +109,17 @@ Deno.serve(async (req) => {
   try {
     const raw = await req.text();
     const hookSecret = Deno.env.get("SEND_EMAIL_HOOK_SECRET");
-    let payload: AuthHookPayload;
-
-    if (hookSecret) {
-      // Standard Webhooks signature verification (Supabase requires this when configured)
-      const wh = new Webhook(hookSecret.replace(/^v1,whsec_/, "").replace(/^whsec_/, ""));
-      const headers = Object.fromEntries(req.headers);
-      payload = wh.verify(raw, headers) as AuthHookPayload;
-    } else {
-      payload = JSON.parse(raw) as AuthHookPayload;
+    if (!hookSecret) {
+      console.error("auth-email-hook: SEND_EMAIL_HOOK_SECRET is not configured; refusing request.");
+      return new Response(
+        JSON.stringify({ ok: false, error: "Hook secret not configured" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
+    // Standard Webhooks signature verification (Supabase requires this).
+    const wh = new Webhook(hookSecret.replace(/^v1,whsec_/, "").replace(/^whsec_/, ""));
+    const headers = Object.fromEntries(req.headers);
+    const payload = wh.verify(raw, headers) as AuthHookPayload;
 
     const { subject, html } = render(payload);
     await sendEmail({ to: payload.user.email, subject, html });
