@@ -1,0 +1,2 @@
+DELETE FROM public.user_roles WHERE role = 'admin'::public.app_role AND user_id IN (SELECT id FROM auth.users WHERE lower(email) = 'admin@test.com');
+DELETE FROM public.admin_allowlist WHERE lower(email) = 'admin@test.com';
