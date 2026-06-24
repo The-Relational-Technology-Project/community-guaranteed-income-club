@@ -30,8 +30,11 @@ const TransactionHistory = ({ userId }: Props) => {
     const list = t ?? [];
     const ids = [...new Set(list.flatMap((x) => [x.sender_id, x.receiver_id]))];
     if (ids.length) {
-      const { data: p } = await supabase.from("profiles").select("*").in("id", ids);
-      setProfileMap(new Map((p ?? []).map((x) => [x.id, x])));
+      const { data: p } = await (supabase as any)
+        .from("members_directory")
+        .select("id, name, photo_url")
+        .in("id", ids);
+      setProfileMap(new Map(((p ?? []) as any[]).map((x) => [x.id, x])));
     }
     setTxns(list);
     setLoading(false);
