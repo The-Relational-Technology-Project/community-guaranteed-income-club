@@ -20,6 +20,7 @@ import MemberCard from "@/pages/MemberCard";
 import Events from "@/pages/Events";
 import Board from "@/pages/Board";
 import Demo from "@/pages/Demo";
+import MemberStats from "@/pages/MemberStats";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +42,7 @@ const App = () => (
               <Route path="/card" element={<ProtectedRoute><MemberCard /></ProtectedRoute>} />
               <Route path="/events" element={<ProtectedRoute><Events /></ProtectedRoute>} />
               <Route path="/board" element={<ProtectedRoute><Board /></ProtectedRoute>} />
+              <Route path="/stats" element={<ProtectedRoute><MemberStats /></ProtectedRoute>} />
               <Route
                 path="/roster"
                 element={
