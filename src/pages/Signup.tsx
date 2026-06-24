@@ -50,14 +50,15 @@ const Signup = () => {
     password: "",
     name: "",
     phone: "",
-    venmo_handle: "",
-    zelle_info: "",
+    payment_method: "venmo",
+    payment_handle: "",
     zip_code: "",
     post_tax_monthly_income: "",
     student_loan_payment: "",
     profession: "",
     employment_status: "employed" as const,
     bio: "",
+    referral: "",
   });
 
   const update = (field: string, value: string) =>
@@ -84,20 +85,34 @@ const Signup = () => {
 
     // Update the auto-created profile with full details
     if (data.user) {
+      let referredById: string | null = null;
+      if (form.referral.trim()) {
+        const q = form.referral.trim();
+        const { data: ref } = await (supabase as any)
+          .from("members_directory")
+          .select("id")
+          .or(`referral_code.eq.${q.toUpperCase()},name.ilike.%${q}%`)
+          .limit(1)
+          .maybeSingle();
+        referredById = ref?.id ?? null;
+      }
       const { error: profileError } = await supabase
         .from("profiles")
         .update({
           name: form.name,
           phone: form.phone || null,
-          venmo_handle: form.venmo_handle || null,
-          zelle_info: form.zelle_info || null,
+          payment_method: form.payment_method,
+          payment_handle: form.payment_handle || null,
+          venmo_handle: form.payment_method === "venmo" ? (form.payment_handle || null) : null,
+          zelle_info: form.payment_method === "zelle" ? (form.payment_handle || null) : null,
           zip_code: form.zip_code,
           post_tax_monthly_income: parseFloat(form.post_tax_monthly_income),
           student_loan_payment: form.student_loan_payment ? parseFloat(form.student_loan_payment) : 0,
           profession: form.profession || null,
           employment_status: form.employment_status,
           bio: form.bio || null,
-        })
+          referred_by: referredById,
+        } as any)
         .eq("id", data.user.id);
 
       if (profileError) {
@@ -203,6 +218,10 @@ const Signup = () => {
                   <Label htmlFor="phone">Phone</Label>
                   <Input id="phone" type="tel" value={form.phone} onChange={(e) => update("phone", e.target.value)} />
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="referral">Referral code or who referred you (optional)</Label>
+                  <Input id="referral" value={form.referral} onChange={(e) => update("referral", e.target.value)} placeholder="6-letter code, name, or email" />
+                </div>
                 <Button type="button" className="w-full" onClick={() => {
                   if (!form.name || !form.email || !form.password) {
                     toast({ title: "Please fill required fields", variant: "destructive" });
@@ -215,14 +234,26 @@ const Signup = () => {
               </>
             ) : (
               <>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="venmo">Venmo Handle</Label>
-                    <Input id="venmo" value={form.venmo_handle} onChange={(e) => update("venmo_handle", e.target.value)} placeholder="@username" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="zelle">Zelle Info</Label>
-                    <Input id="zelle" value={form.zelle_info} onChange={(e) => update("zelle_info", e.target.value)} placeholder="email or phone" />
+                <div className="space-y-2">
+                  <Label>Payment method *</Label>
+                  <p className="text-xs text-muted-foreground">Please provide one — Venmo is the default.</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    <Select value={form.payment_method} onValueChange={(v) => update("payment_method", v)}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="venmo">Venmo</SelectItem>
+                        <SelectItem value="zelle">Zelle</SelectItem>
+                        <SelectItem value="cashapp">CashApp</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Input
+                      className="col-span-2"
+                      value={form.payment_handle}
+                      onChange={(e) => update("payment_handle", e.target.value)}
+                      placeholder={form.payment_method === "venmo" ? "@your-handle" : "handle"}
+                      required
+                    />
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -240,11 +271,11 @@ const Signup = () => {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="profession">Profession / Field</Label>
-                  <Input id="profession" value={form.profession} onChange={(e) => update("profession", e.target.value)} />
+                  <Label htmlFor="profession">Profession / Field *</Label>
+                  <Input id="profession" value={form.profession} onChange={(e) => update("profession", e.target.value)} required />
                 </div>
                 <div className="space-y-2">
-                  <Label>Employment Status</Label>
+                  <Label>Employment Status *</Label>
                   <Select value={form.employment_status} onValueChange={(v) => update("employment_status", v)}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -259,8 +290,8 @@ const Signup = () => {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="bio">Bio</Label>
-                  <Textarea id="bio" value={form.bio} onChange={(e) => update("bio", e.target.value)} placeholder="Tell the community about yourself..." rows={3} />
+                  <Label htmlFor="bio">Bio *</Label>
+                  <Textarea id="bio" value={form.bio} onChange={(e) => update("bio", e.target.value)} placeholder="Tell the community about yourself..." rows={3} required />
                 </div>
                 <div className="flex gap-2">
                   <Button type="button" variant="outline" className="flex-1" onClick={() => setStep(1)}>
