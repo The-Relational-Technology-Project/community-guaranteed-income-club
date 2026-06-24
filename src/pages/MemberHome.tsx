@@ -455,6 +455,31 @@ const MemberHome = () => {
         </Card>
       </section>
     </div>
+      <Dialog open={!!checkInMatch} onOpenChange={(o) => !o && setCheckInMatch(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Your neighbor to check in on 💛</DialogTitle>
+            <DialogDescription>Reach out this week — a text, a coffee, a quick hello.</DialogDescription>
+          </DialogHeader>
+          {checkInMatch && (
+            <div className="flex flex-col items-center gap-3 py-2">
+              <Avatar className="h-20 w-20">
+                <AvatarImage src={checkInMatch.photo_url ?? undefined} className="object-cover" />
+                <AvatarFallback>{checkInMatch.name.charAt(0)}</AvatarFallback>
+              </Avatar>
+              <p className="font-serif text-2xl">{checkInMatch.name}</p>
+              {checkInMatch.bio && <p className="text-sm text-muted-foreground text-center">{checkInMatch.bio}</p>}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCheckInMatch(null)}>Close</Button>
+            {checkInMatch && (
+              <Button onClick={() => navigate(`/roster?member=${checkInMatch.id}`)}>View profile</Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 
