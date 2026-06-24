@@ -22,8 +22,8 @@ const Profile = () => {
   const [form, setForm] = useState({
     name: "",
     phone: "",
-    venmo_handle: "",
-    zelle_info: "",
+    payment_method: "venmo",
+    payment_handle: "",
     zip_code: "",
     post_tax_monthly_income: "",
     student_loan_payment: "",
@@ -41,8 +41,8 @@ const Profile = () => {
       setForm({
         name: profile.name ?? "",
         phone: profile.phone ?? "",
-        venmo_handle: profile.venmo_handle ?? "",
-        zelle_info: profile.zelle_info ?? "",
+        payment_method: (profile as any).payment_method ?? (profile.venmo_handle ? "venmo" : "venmo"),
+        payment_handle: (profile as any).payment_handle ?? profile.venmo_handle ?? profile.zelle_info ?? "",
         zip_code: profile.zip_code ?? "",
         post_tax_monthly_income: String(profile.post_tax_monthly_income ?? ""),
         student_loan_payment: String(profile.student_loan_payment ?? ""),
@@ -70,8 +70,11 @@ const Profile = () => {
       .update({
         name: form.name,
         phone: form.phone || null,
-        venmo_handle: form.venmo_handle || null,
-        zelle_info: form.zelle_info || null,
+        payment_method: form.payment_method || "venmo",
+        payment_handle: form.payment_handle || null,
+        // Keep venmo_handle mirrored for back-compat with legacy code paths
+        venmo_handle: form.payment_method === "venmo" ? (form.payment_handle || null) : null,
+        zelle_info: form.payment_method === "zelle" ? (form.payment_handle || null) : null,
         zip_code: form.zip_code,
         post_tax_monthly_income: parseFloat(form.post_tax_monthly_income),
         student_loan_payment: form.student_loan_payment ? parseFloat(form.student_loan_payment) : 0,
