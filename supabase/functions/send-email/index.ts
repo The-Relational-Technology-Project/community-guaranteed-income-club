@@ -49,30 +49,31 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    // Authenticate caller — this function must never be a public open relay.
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return new Response(JSON.stringify({ ok: false, error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    const authClient = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: authHeader } } }
-    );
-    const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } = await authClient.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims?.sub) {
-      return new Response(JSON.stringify({ ok: false, error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    const callerId = claimsData.claims.sub as string;
-
     const payload = (await req.json()) as Payload;
+
+    // The signup flow can fire `new_signup_admin` before a session exists
+    // (magic-link signup). That kind has a fixed admin recipient and escaped
+    // content, so it is the only path allowed unauthenticated. Every other
+    // kind requires a verified user, and `custom` additionally requires admin.
+    let callerId: string | null = null;
+    const authHeader = req.headers.get("Authorization");
+    if (authHeader?.startsWith("Bearer ")) {
+      const authClient = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_ANON_KEY")!,
+        { global: { headers: { Authorization: authHeader } } }
+      );
+      const token = authHeader.replace("Bearer ", "");
+      const { data: claimsData } = await authClient.auth.getClaims(token);
+      callerId = (claimsData?.claims?.sub as string | undefined) ?? null;
+    }
+    if (payload.kind !== "new_signup_admin" && !callerId) {
+      return new Response(JSON.stringify({ ok: false, error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
@@ -177,7 +178,7 @@ Deno.serve(async (req) => {
       const { data: roleRow } = await supabase
         .from("user_roles")
         .select("role")
-        .eq("user_id", callerId)
+        .eq("user_id", callerId!)
         .eq("role", "admin")
         .maybeSingle();
       if (!roleRow) {
