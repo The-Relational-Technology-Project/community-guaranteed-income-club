@@ -13,6 +13,7 @@ type SiteContent = Tables<"site_content">;
 const About = () => {
   const [faqItems, setFaqItems] = useState<SiteContent[]>([]);
   const [aboutItems, setAboutItems] = useState<SiteContent[]>([]);
+  const [pilotStats, setPilotStats] = useState({ members: "—", moved: "—", completion: "100%", gatherings: "—" });
 
   useEffect(() => {
     const load = async () => {
@@ -28,6 +29,21 @@ const About = () => {
         .eq("section", "about")
         .order("sort_order");
       setAboutItems(about ?? []);
+      const [{ count: members }, { data: txns }, { count: events }] = await Promise.all([
+        supabase.from("profiles").select("id", { count: "exact", head: true }).eq("participant_status", "active"),
+        supabase.from("transactions").select("amount, is_confirmed_sender"),
+        supabase.from("events").select("id", { count: "exact", head: true }),
+      ]);
+      const moved = (txns ?? []).reduce((s, t) => s + Number(t.amount || 0), 0);
+      const total = (txns ?? []).length;
+      const confirmed = (txns ?? []).filter((t) => t.is_confirmed_sender).length;
+      const pct = total > 0 ? Math.round((confirmed / total) * 100) : 100;
+      setPilotStats({
+        members: `${members ?? 0}`,
+        moved: moved >= 1000 ? `$${Math.round(moved / 1000)}k+` : `$${moved.toFixed(0)}`,
+        completion: `${pct}%`,
+        gatherings: `${events ?? 0}`,
+      });
     };
     load();
   }, []);
@@ -56,7 +72,7 @@ const About = () => {
         <Card>
           <CardHeader><CardTitle className="font-serif">Pilot results</CardTitle></CardHeader>
           <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-            {[["50+", "members"], ["$23k+", "moved"], ["100%", "completion"], ["12+", "gatherings"]].map(([n, l]) => (
+            {[[pilotStats.members, "members"], [pilotStats.moved, "moved"], [pilotStats.completion, "completion"], [pilotStats.gatherings, "gatherings"]].map(([n, l]) => (
               <div key={l}>
                 <p className="font-serif text-3xl text-accent">{n}</p>
                 <p className="text-xs uppercase tracking-wider text-muted-foreground mt-1">{l}</p>
