@@ -215,8 +215,8 @@ const Signup = () => {
                   <Input id="password" type="password" value={form.password} onChange={(e) => update("password", e.target.value)} required minLength={6} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Phone</Label>
-                  <Input id="phone" type="tel" value={form.phone} onChange={(e) => update("phone", e.target.value)} />
+                  <Label htmlFor="phone">Phone *</Label>
+                  <Input id="phone" type="tel" value={form.phone} onChange={(e) => update("phone", e.target.value)} required />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="referral">Referral code or who referred you (optional)</Label>
