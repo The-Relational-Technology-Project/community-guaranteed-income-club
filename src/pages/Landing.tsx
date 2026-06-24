@@ -26,7 +26,7 @@ const Landing = () => {
   const [myIncome, setMyIncome] = useState("");
   const [studentLoans, setStudentLoans] = useState("");
   const [groupAvg, setGroupAvg] = useState("2800");
-  const [stats, setStats] = useState({ members: "50+", moved: "$21k+", gatherings: "12", completed: "100%" });
+  const [stats, setStats] = useState({ members: "—", moved: "—", gatherings: "—", completed: "—" });
 
   useEffect(() => {
     const load = async () => {
@@ -35,14 +35,14 @@ const Landing = () => {
         supabase.from("transactions").select("amount, is_confirmed_sender"),
         supabase.from("events").select("id", { count: "exact", head: true }),
       ]);
-      const moved = 21000 + (txns ?? []).reduce((s, t) => s + Number(t.amount || 0), 0);
+      const moved = (txns ?? []).reduce((s, t) => s + Number(t.amount || 0), 0);
       const total = (txns ?? []).length;
       const confirmed = (txns ?? []).filter((t) => t.is_confirmed_sender).length;
       const pct = total > 0 ? Math.round((confirmed / total) * 100) : 100;
       setStats({
-        members: memberCount ? `${memberCount}+` : "50+",
-        moved: `$${Math.round(moved / 1000)}k+`,
-        gatherings: String(eventCount ?? 12),
+        members: memberCount ? `${memberCount}` : "0",
+        moved: moved >= 1000 ? `$${Math.round(moved / 1000)}k+` : `$${moved.toFixed(0)}`,
+        gatherings: String(eventCount ?? 0),
         completed: `${pct}%`,
       });
     };
