@@ -130,6 +130,10 @@ const MemberHome = () => {
     };
     load();
 
+    // Refresh when tab becomes visible (covers cases where Realtime missed events)
+    const onVis = () => { if (document.visibilityState === "visible") load(); };
+    document.addEventListener("visibilitychange", onVis);
+
     // Realtime updates for the user's own transaction this month
     const channel = supabase
       .channel("memberhome-txns")
@@ -143,8 +147,14 @@ const MemberHome = () => {
         { event: "*", schema: "public", table: "board_posts" },
         () => load()
       )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "calculation_runs" },
+        () => load()
+      )
       .subscribe();
     return () => {
+      document.removeEventListener("visibilitychange", onVis);
       supabase.removeChannel(channel);
     };
   }, [user]);
