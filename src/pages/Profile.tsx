@@ -22,8 +22,8 @@ const Profile = () => {
   const [form, setForm] = useState({
     name: "",
     phone: "",
-    venmo_handle: "",
-    zelle_info: "",
+    payment_method: "venmo",
+    payment_handle: "",
     zip_code: "",
     post_tax_monthly_income: "",
     student_loan_payment: "",
@@ -41,8 +41,8 @@ const Profile = () => {
       setForm({
         name: profile.name ?? "",
         phone: profile.phone ?? "",
-        venmo_handle: profile.venmo_handle ?? "",
-        zelle_info: profile.zelle_info ?? "",
+        payment_method: (profile as any).payment_method ?? (profile.venmo_handle ? "venmo" : "venmo"),
+        payment_handle: (profile as any).payment_handle ?? profile.venmo_handle ?? profile.zelle_info ?? "",
         zip_code: profile.zip_code ?? "",
         post_tax_monthly_income: String(profile.post_tax_monthly_income ?? ""),
         student_loan_payment: String(profile.student_loan_payment ?? ""),
@@ -70,8 +70,11 @@ const Profile = () => {
       .update({
         name: form.name,
         phone: form.phone || null,
-        venmo_handle: form.venmo_handle || null,
-        zelle_info: form.zelle_info || null,
+        payment_method: form.payment_method || "venmo",
+        payment_handle: form.payment_handle || null,
+        // Keep venmo_handle mirrored for back-compat with legacy code paths
+        venmo_handle: form.payment_method === "venmo" ? (form.payment_handle || null) : null,
+        zelle_info: form.payment_method === "zelle" ? (form.payment_handle || null) : null,
         zip_code: form.zip_code,
         post_tax_monthly_income: parseFloat(form.post_tax_monthly_income),
         student_loan_payment: form.student_loan_payment ? parseFloat(form.student_loan_payment) : 0,
@@ -166,14 +169,25 @@ const Profile = () => {
                 <Input id="phone" type="tel" value={form.phone} onChange={(e) => update("phone", e.target.value)} />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="venmo">Venmo Handle</Label>
-                <Input id="venmo" value={form.venmo_handle} onChange={(e) => update("venmo_handle", e.target.value)} placeholder="@username" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="zelle">Zelle Info</Label>
-                <Input id="zelle" value={form.zelle_info} onChange={(e) => update("zelle_info", e.target.value)} />
+            <div className="space-y-2">
+              <Label>Payment method *</Label>
+              <p className="text-xs text-muted-foreground">Please provide one — Venmo is the default.</p>
+              <div className="grid grid-cols-3 gap-2">
+                <Select value={form.payment_method} onValueChange={(v) => update("payment_method", v)}>
+                  <SelectTrigger className="col-span-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="venmo">Venmo</SelectItem>
+                    <SelectItem value="zelle">Zelle</SelectItem>
+                    <SelectItem value="cashapp">CashApp</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Input
+                  className="col-span-2"
+                  value={form.payment_handle}
+                  onChange={(e) => update("payment_handle", e.target.value)}
+                  placeholder={form.payment_method === "venmo" ? "@your-handle" : form.payment_method === "zelle" ? "email or phone" : form.payment_method === "cashapp" ? "$cashtag" : "handle / instructions"}
+                />
               </div>
             </div>
             <div className="space-y-2">

@@ -15,6 +15,7 @@ interface Payload {
   memberName?: string;
   memberEmail?: string;
   note?: string;
+  matchedName?: string;
   // For custom
   subject?: string;
   heading?: string;
@@ -114,13 +115,14 @@ Deno.serve(async (req) => {
 
     if (payload.kind === "check_in_intent") {
       const name = payload.memberName ?? "A member";
+      const matched = payload.matchedName ? `<p><strong>Matched with:</strong> ${payload.matchedName}</p>` : "";
       const noteHtml = payload.note
         ? `<p style="border-left:3px solid #1d4ed8;padding:8px 12px;background:#f1f5f9;">${payload.note.replace(/</g, "&lt;")}</p>`
         : "";
       const html = brandedEmail({
         preheader: `${name} wants to check in on a neighbor`,
         heading: "Check-in intent",
-        bodyHtml: `<p><strong>${name}</strong> (${payload.memberEmail ?? "no email on file"}) tapped "Check in on a neighbor" on their member home.</p>${noteHtml}<p>If you want to pair them with someone, open the admin dashboard.</p>`,
+        bodyHtml: `<p><strong>${name}</strong> (${payload.memberEmail ?? "no email on file"}) tapped "Check in on a neighbor" on their member home.</p>${matched}${noteHtml}<p>The match was made automatically and logged in the admin dashboard.</p>`,
         ctaLabel: "Open admin dashboard",
         ctaUrl: `${SITE_URL}/admin`,
       });

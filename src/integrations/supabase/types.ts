@@ -32,6 +32,52 @@ export type Database = {
         }
         Relationships: []
       }
+      board_comments: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          id: string
+          post_id: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          created_at?: string
+          id?: string
+          post_id: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          post_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "board_comments_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "members_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "board_comments_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "board_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "board_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       board_posts: {
         Row: {
           archived_at: string | null
@@ -234,6 +280,59 @@ export type Database = {
         }
         Relationships: []
       }
+      neighbor_checkins: {
+        Row: {
+          created_at: string
+          id: string
+          matched_id: string
+          note: string | null
+          requester_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          matched_id: string
+          note?: string | null
+          requester_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          matched_id?: string
+          note?: string | null
+          requester_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "neighbor_checkins_matched_id_fkey"
+            columns: ["matched_id"]
+            isOneToOne: false
+            referencedRelation: "members_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "neighbor_checkins_matched_id_fkey"
+            columns: ["matched_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "neighbor_checkins_requester_id_fkey"
+            columns: ["requester_id"]
+            isOneToOne: false
+            referencedRelation: "members_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "neighbor_checkins_requester_id_fkey"
+            columns: ["requester_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profile_history: {
         Row: {
           changed_at: string
@@ -299,11 +398,15 @@ export type Database = {
           participant_status:
             | Database["public"]["Enums"]["participant_status"]
             | null
+          payment_handle: string | null
+          payment_method: string | null
           phone: string | null
           photo_url: string | null
           post_tax_monthly_income: number | null
           preferred_contact_method: string | null
           profession: string | null
+          referral_code: string | null
+          referred_by: string | null
           student_loan_payment: number | null
           updated_at: string
           venmo_handle: string | null
@@ -329,11 +432,15 @@ export type Database = {
           participant_status?:
             | Database["public"]["Enums"]["participant_status"]
             | null
+          payment_handle?: string | null
+          payment_method?: string | null
           phone?: string | null
           photo_url?: string | null
           post_tax_monthly_income?: number | null
           preferred_contact_method?: string | null
           profession?: string | null
+          referral_code?: string | null
+          referred_by?: string | null
           student_loan_payment?: number | null
           updated_at?: string
           venmo_handle?: string | null
@@ -359,18 +466,37 @@ export type Database = {
           participant_status?:
             | Database["public"]["Enums"]["participant_status"]
             | null
+          payment_handle?: string | null
+          payment_method?: string | null
           phone?: string | null
           photo_url?: string | null
           post_tax_monthly_income?: number | null
           preferred_contact_method?: string | null
           profession?: string | null
+          referral_code?: string | null
+          referred_by?: string | null
           student_loan_payment?: number | null
           updated_at?: string
           venmo_handle?: string | null
           zelle_info?: string | null
           zip_code?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_referred_by_fkey"
+            columns: ["referred_by"]
+            isOneToOne: false
+            referencedRelation: "members_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_referred_by_fkey"
+            columns: ["referred_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       site_content: {
         Row: {
@@ -554,16 +680,25 @@ export type Database = {
             | Database["public"]["Enums"]["employment_status"]
             | null
           favorite_third_space: string | null
+          helps_count: number | null
           id: string | null
           is_verified: boolean | null
+          joined_at: string | null
           name: string | null
           open_to_in_person: boolean | null
           participant_status:
             | Database["public"]["Enums"]["participant_status"]
             | null
+          payment_handle: string | null
+          payment_method: string | null
           photo_url: string | null
+          posts_count: number | null
           preferred_contact_method: string | null
           profession: string | null
+          referral_code: string | null
+          referral_count: number | null
+          referred_by: string | null
+          rsvps_count: number | null
           venmo_handle: string | null
           zip_code: string | null
         }
@@ -575,16 +710,25 @@ export type Database = {
             | Database["public"]["Enums"]["employment_status"]
             | null
           favorite_third_space?: string | null
+          helps_count?: never
           id?: string | null
           is_verified?: boolean | null
+          joined_at?: string | null
           name?: string | null
           open_to_in_person?: boolean | null
           participant_status?:
             | Database["public"]["Enums"]["participant_status"]
             | null
+          payment_handle?: string | null
+          payment_method?: string | null
           photo_url?: string | null
+          posts_count?: never
           preferred_contact_method?: string | null
           profession?: string | null
+          referral_code?: string | null
+          referral_count?: never
+          referred_by?: string | null
+          rsvps_count?: never
           venmo_handle?: string | null
           zip_code?: string | null
         }
@@ -596,20 +740,44 @@ export type Database = {
             | Database["public"]["Enums"]["employment_status"]
             | null
           favorite_third_space?: string | null
+          helps_count?: never
           id?: string | null
           is_verified?: boolean | null
+          joined_at?: string | null
           name?: string | null
           open_to_in_person?: boolean | null
           participant_status?:
             | Database["public"]["Enums"]["participant_status"]
             | null
+          payment_handle?: string | null
+          payment_method?: string | null
           photo_url?: string | null
+          posts_count?: never
           preferred_contact_method?: string | null
           profession?: string | null
+          referral_code?: string | null
+          referral_count?: never
+          referred_by?: string | null
+          rsvps_count?: never
           venmo_handle?: string | null
           zip_code?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_referred_by_fkey"
+            columns: ["referred_by"]
+            isOneToOne: false
+            referencedRelation: "members_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_referred_by_fkey"
+            columns: ["referred_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Functions: {

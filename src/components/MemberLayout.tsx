@@ -13,6 +13,8 @@ import {
   Settings,
   LogOut,
   ShieldCheck,
+  Info,
+  BarChart3,
 } from "lucide-react";
 
 const MemberLayout = ({ children }: { children: React.ReactNode }) => {
@@ -26,6 +28,8 @@ const MemberLayout = ({ children }: { children: React.ReactNode }) => {
     { to: "/card", label: "Card", icon: CreditCard },
     { to: "/events", label: "Gatherings", icon: Calendar },
     { to: "/board", label: "Board", icon: MessageSquare },
+    { to: "/stats", label: "Stats", icon: BarChart3 },
+    { to: "/about", label: "About", icon: Info },
   ];
   const mobileLinks = isAdmin
     ? [...links, { to: "/admin", label: "Admin", icon: ShieldCheck }]

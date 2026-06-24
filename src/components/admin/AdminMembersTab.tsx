@@ -27,6 +27,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import type { Tables } from "@/integrations/supabase/types";
 import MemberTransactionPanel from "./MemberTransactionPanel";
 import AddManagedMemberDialog from "./AddManagedMemberDialog";
+import AdminCheckInsCard from "./AdminCheckInsCard";
 
 type Profile = Tables<"profiles">;
 type CalcRun = Tables<"calculation_runs">;
@@ -230,6 +231,7 @@ const AdminMembersTab = ({ profiles, runs, onRefresh }: AdminMembersTabProps) =>
                 <TableHead>ZIP</TableHead>
                 <TableHead>Income</TableHead>
                 <TableHead>Verified</TableHead>
+                <TableHead>Refs</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="w-32">Welcome</TableHead>
               </TableRow>
@@ -267,6 +269,9 @@ const AdminMembersTab = ({ profiles, runs, onRefresh }: AdminMembersTabProps) =>
                       <span className="text-xs text-muted-foreground">{p.is_verified ? "Yes" : "No"}</span>
                     </div>
                   </TableCell>
+                  <TableCell className="text-sm">
+                    {profiles.filter((x) => (x as any).referred_by === p.id).length || "—"}
+                  </TableCell>
                   <TableCell onClick={(e) => e.stopPropagation()}>
                     <Select
                       value={p.participant_status ?? "inactive"}
@@ -301,7 +306,7 @@ const AdminMembersTab = ({ profiles, runs, onRefresh }: AdminMembersTabProps) =>
                 </TableRow>
                 {isOpen && (
                   <TableRow className="bg-muted/30">
-                    <TableCell colSpan={8}>
+                    <TableCell colSpan={9}>
                       {managed && ((p as any).contact_method || (p as any).contact_notes) && (
                         <div className="mb-3 text-xs text-muted-foreground">
                           <span className="font-medium">Contact:</span>{" "}
@@ -363,6 +368,8 @@ const AdminMembersTab = ({ profiles, runs, onRefresh }: AdminMembersTabProps) =>
           </CardContent>
         </Card>
       )}
+
+      <AdminCheckInsCard />
 
       {/* Confirm Dialog */}
       <Dialog open={showConfirm} onOpenChange={setShowConfirm}>

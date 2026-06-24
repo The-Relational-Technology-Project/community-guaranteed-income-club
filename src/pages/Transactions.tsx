@@ -84,12 +84,12 @@ const Transactions = () => {
     fetchTransactions();
   }, [user]);
 
-  const confirmTransaction = async (txnId: string, role: "sender" | "receiver") => {
-    const { error } = await confirmTransactionSide(txnId, role);
+  const confirmTransaction = async (txnId: string, role: "sender" | "receiver", currentlyConfirmed: boolean) => {
+    const { error } = await confirmTransactionSide(txnId, role, !currentlyConfirmed);
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
-      toast({ title: "Confirmed!" });
+      toast({ title: currentlyConfirmed ? "Marked as not done" : "Confirmed!" });
       fetchTransactions();
     }
   };
@@ -212,11 +212,10 @@ const Transactions = () => {
                       <div className="flex items-center gap-2">
                         <Checkbox
                           checked={!!isConfirmed}
-                          disabled={!!isConfirmed}
-                          onCheckedChange={() => confirmTransaction(txn.id, isSender ? "sender" : "receiver")}
+                          onCheckedChange={() => confirmTransaction(txn.id, isSender ? "sender" : "receiver", !!isConfirmed)}
                         />
                         <span className="text-xs text-muted-foreground">
-                          {isConfirmed ? "Confirmed" : "Mark done"}
+                          {isConfirmed ? "Confirmed (click to undo)" : "Mark done"}
                         </span>
                       </div>
                     </div>

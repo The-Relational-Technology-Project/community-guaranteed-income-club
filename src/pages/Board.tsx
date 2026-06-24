@@ -12,6 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Archive, CheckCircle2 } from "lucide-react";
+import BoardComments from "@/components/BoardComments";
 
 type PostType = "offer" | "need" | "lead";
 
@@ -248,6 +249,7 @@ const Board = () => {
                   , {timeAgo(p.created_at)}
                   {p.helped_by_name && <> · helped by <span className="text-foreground">{p.helped_by_name}</span></>}
                 </p>
+                <BoardComments postId={p.id} />
               </div>
               {canArchive(p) && (
                 <Button variant="ghost" size="sm" className="self-start" onClick={() => openArchive(p)}>
