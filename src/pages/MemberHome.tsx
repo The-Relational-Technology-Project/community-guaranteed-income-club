@@ -49,6 +49,8 @@ const MemberHome = () => {
   const [upcomingEvents, setUpcomingEvents] = useState<EventRow[]>([]);
   const [boardPreview, setBoardPreview] = useState<LiveBoardPost[]>([]);
   const [sendingCheckIn, setSendingCheckIn] = useState(false);
+  const [activeMemberCount, setActiveMemberCount] = useState<number | null>(null);
+  const [checkInMatch, setCheckInMatch] = useState<{ name: string; bio: string | null; photo_url: string | null; id: string } | null>(null);
 
   const firstName = profile?.name?.split(" ")[0] ?? "friend";
   const monthLabel = new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" });
@@ -117,6 +119,12 @@ const MemberHome = () => {
       }
       setBoardPreview((posts ?? []).map((p: any) => ({ ...p, author_name: nameMap.get(p.author_id) ?? "Example" })));
 
+      const { count: mc } = await supabase
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .eq("participant_status", "active");
+      setActiveMemberCount(mc ?? 0);
+
       setLoading(false);
     };
     load();
@@ -140,17 +148,21 @@ const MemberHome = () => {
     };
   }, [user]);
 
-  const confirmSend = async () => {
+  const toggleSent = async () => {
     if (!thisMonth) return;
+    const next = !thisMonth.is_confirmed_sender;
     const { error } = await supabase
       .from("transactions")
-      .update({ is_confirmed_sender: true, confirmed_sender_at: new Date().toISOString() })
+      .update({
+        is_confirmed_sender: next,
+        confirmed_sender_at: next ? new Date().toISOString() : null,
+      })
       .eq("id", thisMonth.id);
     if (error) {
       toast({ title: "Couldn't update", description: error.message, variant: "destructive" });
     } else {
-      toast({ title: "Marked as sent — thank you 💛" });
-      setThisMonth({ ...thisMonth, is_confirmed_sender: true });
+      toast({ title: next ? "Marked as sent — thank you 💛" : "Undone" });
+      setThisMonth({ ...thisMonth, is_confirmed_sender: next });
     }
   };
 
@@ -176,18 +188,37 @@ const MemberHome = () => {
       navigate("/board?filter=need");
     } else if (id === "support") {
       setSendingCheckIn(true);
-      const { error } = await supabase.functions.invoke("send-email", {
+      // Pick a random eligible active member (not self)
+      const { data: pool } = await (supabase as any)
+        .from("members_directory")
+        .select("id, name, bio, photo_url")
+        .eq("participant_status", "active")
+        .neq("id", user?.id ?? "");
+      const candidates = (pool ?? []) as Array<{ id: string; name: string; bio: string | null; photo_url: string | null }>;
+      if (!candidates.length) {
+        setSendingCheckIn(false);
+        toast({ title: "No one to match yet", description: "Try again once more neighbors join.", variant: "destructive" });
+        return;
+      }
+      const pick = candidates[Math.floor(Math.random() * candidates.length)];
+      const { error } = await supabase.from("neighbor_checkins").insert({
+        requester_id: user!.id,
+        matched_id: pick.id,
+      } as any);
+      // Best-effort email to admin
+      supabase.functions.invoke("send-email", {
         body: {
           kind: "check_in_intent",
           memberName: profile?.name,
           memberEmail: profile?.email,
+          matchedName: pick.name,
         },
-      });
+      }).catch(() => {});
       setSendingCheckIn(false);
       if (error) {
-        toast({ title: "Couldn't send", description: error.message, variant: "destructive" });
+        toast({ title: "Couldn't match", description: error.message, variant: "destructive" });
       } else {
-        toast({ title: "Sent 💛", description: "Alex will reach out about pairing you with a neighbor." });
+        setCheckInMatch(pick);
       }
     }
   };
@@ -196,7 +227,7 @@ const MemberHome = () => {
     <div className="max-w-4xl mx-auto px-4 md:px-8 py-8 md:py-12 space-y-10">
       {/* Greeting */}
       <header>
-        <p className="text-sm text-muted-foreground uppercase tracking-wider">{monthLabel} · 50 members strong</p>
+        <p className="text-sm text-muted-foreground uppercase tracking-wider">{monthLabel}{activeMemberCount !== null ? ` · ${activeMemberCount} member${activeMemberCount === 1 ? "" : "s"} strong` : ""}</p>
         <h1 className="text-4xl md:text-5xl font-serif mt-2">Hey, {firstName}.</h1>
         <p className="text-muted-foreground mt-2 max-w-xl">
           Here's what's moving through the club this month, and a few small ways to show up.
@@ -253,11 +284,11 @@ const MemberHome = () => {
                     <Button variant="outline" className="rounded-full">Zelle: {thisMonth.receiver.zelle_info}</Button>
                   )}
                   {thisMonth.is_confirmed_sender ? (
-                    <Badge className="bg-success text-success-foreground rounded-full px-3 py-1.5">
-                      <Check className="h-3.5 w-3.5 mr-1" /> Sent
-                    </Badge>
+                    <Button variant="ghost" onClick={toggleSent} className="rounded-full text-success">
+                      <Check className="h-3.5 w-3.5 mr-1" /> Sent — click to undo
+                    </Button>
                   ) : (
-                    <Button variant="secondary" onClick={confirmSend} className="rounded-full">
+                    <Button variant="secondary" onClick={toggleSent} className="rounded-full">
                       I've sent this
                     </Button>
                   )}
